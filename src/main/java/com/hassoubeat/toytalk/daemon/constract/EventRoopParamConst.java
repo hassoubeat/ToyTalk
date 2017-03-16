@@ -5,8 +5,6 @@
  */
 package com.hassoubeat.toytalk.daemon.constract;
 
-import java.io.Serializable;
-
 /**
  *
  * @author hassoubeat

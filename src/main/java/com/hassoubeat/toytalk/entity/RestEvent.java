@@ -44,15 +44,20 @@ public class RestEvent {
     @Getter
     @Setter
     private Date roopEndDate;
+    
+    @Getter
+    @Setter
+    private Integer toyId;
+    
+    @Getter
+    @Setter
+    private Integer accountId;
+    
+    @Getter
+    @Setter
+    private Integer FacetId;
 
     public RestEvent() {
-        this.id = id;
-        this.name = name;
-        this.content = content;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.roop = roop;
-        this.roopEndDate = roopEndDate;
     }
     
     

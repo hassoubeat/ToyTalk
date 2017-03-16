@@ -7,17 +7,14 @@ package com.hassoubeat.toytalk.quartz;
 
 import com.hassoubeat.toytalk.daemon.constract.MessageConst;
 import com.hassoubeat.toytalk.entity.RestEvent;
-import com.hassoubeat.toytalk.quartz.job.JsayJob;
+import com.hassoubeat.toytalk.quartz.job.JobFactory;
+import com.hassoubeat.toytalk.quartz.trigger.TriggerFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.jms.Message;
-import static org.quartz.JobBuilder.newJob;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import org.quartz.Trigger;
-import static org.quartz.TriggerBuilder.newTrigger;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.LoggerFactory;
 
@@ -44,25 +41,7 @@ public class QuartzManager {
         }
         
     }
-    
-    /**
-     * Toyに紐づく全イベントを取得して、スケジューラに登録するメソッド
-     */
-    public void fetchAllEvent() {
-        // TODO REST_APIでデータを用意する
         
-        Trigger trigger40Sec = newTrigger().withIdentity("trigger1", "group1").startNow().withSchedule(simpleSchedule().withIntervalInSeconds(40).repeatForever()).build();
-        JobDetail job1 = newJob(JsayJob.class).withIdentity("job1", "group1").build();
-       
-        try {
-            scheduler.scheduleJob(job1, trigger40Sec);
-        } catch (SchedulerException ex) {
-            // TODO Exception発生時の挙動
-        }
-        
-        
-    }
-    
     /**
      * 差分イベントを取得して、スケジューラに登録するメソッド
      */
@@ -76,16 +55,12 @@ public class QuartzManager {
      */
     public void addEvent(RestEvent restEvent) {
         
-        // TODO 入力値から動的にJobを生成する
-        // TODO アカウント、ファセット、Toyどれに紐づくイベントかでグループを変更する
-        JobDetail job = newJob(JsayJob.class).withIdentity("job" + String.valueOf(restEvent.getId()), "group1").build();
-        job.getJobDataMap().put("eventName", restEvent.getName());
-        job.getJobDataMap().put("eventContent", restEvent.getContent());
+        // JobとTriggerを取得する
+        JobDetail job = JobFactory.getJob(restEvent);
+        Trigger trigger = TriggerFactory.getTrigger(restEvent);
         
-        Trigger trigger40Sec = newTrigger().withIdentity("trigger" + String.valueOf(restEvent.getId()), "group1").startNow().withSchedule(simpleSchedule().withIntervalInSeconds(40).repeatForever()).build();
-        // TODO 日時から動的にTriggerを生成する
         try {
-            scheduler.scheduleJob(job, trigger40Sec);
+            scheduler.scheduleJob(job, trigger);
             logger.info("{}.{} EVENT_ID:{}, EVENT_NAME:{}, JOB_ID:{}, TRIGGER_ID:{}", MessageConst.SUCCESS_REGIST_EVENT_TO_SCHEDULE.getId(), MessageConst.SUCCESS_REGIST_EVENT_TO_SCHEDULE.getMessage(), restEvent.getId(), restEvent.getName(), "job" + String.valueOf(restEvent.getId()), "trigger" + String.valueOf(restEvent.getId()));
         } catch (SchedulerException ex) {
             // TODO Exception発生時の挙動

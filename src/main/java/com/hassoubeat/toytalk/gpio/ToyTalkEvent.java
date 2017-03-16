@@ -17,7 +17,6 @@ import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 
 import static java.lang.Thread.sleep;
 import java.util.List;
-import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
