@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter;
  *
  * @author hassoubeat
  */
-public class ConsoleViewer implements Viewer{
+public class ConsoleViewer extends Viewer{
     
     @Override
     public void displayStartingView() {
@@ -48,13 +48,15 @@ public class ConsoleViewer implements Viewer{
     }
 
     @Override
-    public void displayModeSelectView(int cursol) {
+    public void displayModeSelectView() {
         // 【モード選択画面】を表示する
         System.out.println("");
         System.out.println("");
         int i = 0;
         for (String item : MODE_SELECT_MENU_LIST) {            
-            if (i == cursol) {
+            if (i == getClass().hashCode()
+                    
+                    ) {
                 // 選択中のアイテムにカーソルを出力する
                 System.out.println("・" + item + " ←");
             } else {
@@ -63,6 +65,28 @@ public class ConsoleViewer implements Viewer{
             }
             i++;
         }
+        System.out.println("");
+        System.out.println("");
+    }
+    
+    @Override
+    public void displayRequestParamInvalidView() {
+        // 【リクエストパラメータ不備画面】を表示する
+        System.out.println("");
+        System.out.println("");
+        System.out.println("---- Bad Request Parameter ----");
+        System.out.println("---- Please Check Config ----");
+        System.out.println("");
+        System.out.println("");
+    }
+    
+    @Override
+    public void displayAccessFilterUnApprovalView() {
+        // 【アクセスフィルター未承認画面】を表示する
+        System.out.println("");
+        System.out.println("");
+        System.out.println("---- Access Approval ----");
+        System.out.println("---- From ToyManager ----");
         System.out.println("");
         System.out.println("");
     }
@@ -84,6 +108,22 @@ public class ConsoleViewer implements Viewer{
 
     @Override
     public void displayNetworkUnconnectView() {
+         // 【ネットワーク未接続画面】を表示する
+        System.out.println("");
+        System.out.println("");
+        System.out.println("---- Network UnConnect ----");
+        System.out.println("---- Please Wifi Setting ----");
+        System.out.println("");
+        System.out.println("");
+    }
+    
+    @Override
+    public void displayEventDataResetView() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void displayToyInitView() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

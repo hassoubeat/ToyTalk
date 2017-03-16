@@ -21,37 +21,37 @@ import lombok.Getter;
 public class GPIO {
     
     // シングルトンインスタンス
-    private static GPIO gpioInstance = new GPIO();
+    private static final GPIO GPIO_INSTANCE = new GPIO();
     
-    private GpioController gpio;
+    private final GpioController gpio;
     
     @Getter
     // ToyTalkが動作している間点灯するLEDを制御するGPIOピン
-    private GpioPinDigitalOutput POWER_LED;
+    private final GpioPinDigitalOutput POWER_LED;
     
     @Getter
     // ToyTalkがToyManagerと接続している間点灯するLEDを制御するGPIOピン
-    private GpioPinDigitalOutput CONNECT_LED;
+    private final GpioPinDigitalOutput CONNECT_LED;
     
     @Getter
     // ToyTalkの左ボタンを制御するGPIOピン
-    private GpioPinDigitalInput LEFT_BUTTON;
+    private final GpioPinDigitalInput LEFT_BUTTON;
     
     @Getter
     // ToyTalkの右ボタンを制御するGPIOピン
-    private GpioPinDigitalInput RIGHT_BUTTON;
+    private final GpioPinDigitalInput RIGHT_BUTTON;
     
     @Getter
     // ToyTalkの決定ボタンを制御するGPIOピン
-    private GpioPinDigitalInput ENTER_BUTTON;
+    private final GpioPinDigitalInput ENTER_BUTTON;
     
     @Getter
     // ToyTalkのModeボタンを制御するGPIOピン
-    private GpioPinDigitalInput MODE_BUTTON;
+    private final GpioPinDigitalInput MODE_BUTTON;
     
     @Getter
     // ToyTalkのSYNCボタンを制御するGPIOピン
-    private GpioPinDigitalInput SYNC_BUTTON;
+    private final GpioPinDigitalInput SYNC_BUTTON;
     
     // コンストラクタ
     private GPIO() {
@@ -61,7 +61,7 @@ public class GPIO {
         POWER_LED = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_06, "POWER_LED", PinState.LOW);
         POWER_LED.setShutdownOptions(true, PinState.LOW, PinPullResistance.OFF);
         
-        CONNECT_LED = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_02, "CONNECT_LED", PinState.LOW);
+        CONNECT_LED = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_00, "CONNECT_LED", PinState.LOW);
         CONNECT_LED.setShutdownOptions(true, PinState.LOW, PinPullResistance.OFF);
         
         LEFT_BUTTON = gpio.provisionDigitalInputPin(RaspiPin.GPIO_03, "LEFT_BUTTON", PinPullResistance.PULL_DOWN);
@@ -82,12 +82,33 @@ public class GPIO {
     }
     
     /**
-     * GPIOのスタートアップを実行する
+     * 電源LEDをONにする
      */
-    public void startup() {
-        // 電源LEDをONにする
+    public void powerLedOn() {
         POWER_LED.high();
     }
+    
+    /**
+     * 電源LEDをOFFにする
+     */
+    public void powerLedOff() {
+        POWER_LED.low();
+    }
+    
+    /**
+     * サーバ接続状態LEDをONにする
+     */
+    public void connectLedOn() {
+        CONNECT_LED.high();
+    }
+    
+    /**
+     * サーバ接続状態LEDをOFFにする
+     */
+    public void connectLedOff() {
+        CONNECT_LED.low();
+    }
+    
     
     /**
      * GPIOのシャットダウンを実行する
@@ -102,13 +123,6 @@ public class GPIO {
      * @return 
      */
     public static GPIO getInstance(){
-        return gpioInstance;
-    }
-    
-    
-    
-    
-    
-    
-    
+        return GPIO_INSTANCE;
+    }   
 }

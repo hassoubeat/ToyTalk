@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE logback>
+<configuration>
+  <!-- ログ出力の設定定義ファイルを読み込む -->  
+  <property file="./Logging.properties" />
+  <!-- ログ出力ファイル名用のタイムスタンプ -->
+  <timestamp key="time" datePattern="yyyyMMdd" />
+  
+  <!-- コンソール出力アペンダー -->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>${log.console.output.pattern}</pattern>
+    </encoder>
+  </appender>
+  <!-- ファイル出力アペンダー -->
+  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+    <file>${log.file.output.path}${time}_${log.file.output.name}</file>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>${log.file.output.pattern}</pattern>
+    </encoder>
+  </appender>
+
+  <root level="${log.output.level}">
+    <appender-ref ref="STDOUT" />
+    <appender-ref ref="FILE" />
+  </root>
+</configuration>

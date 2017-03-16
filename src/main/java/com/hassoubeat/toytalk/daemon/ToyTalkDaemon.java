@@ -32,6 +32,7 @@ public class ToyTalkDaemon implements Daemon{
     public void start() throws Exception {
         System.out.println(this.getClass().getName() + ":start()");
         toyTalkEvent.run();
+        
     }
 
     @Override

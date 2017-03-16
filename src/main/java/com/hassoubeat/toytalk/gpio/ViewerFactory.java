@@ -11,12 +11,13 @@ package com.hassoubeat.toytalk.gpio;
  */
 public class ViewerFactory {
     
-    private ViewerFactory() {
-        
+    private static final Viewer VIEWER_INSTANCE = new Lcd16_2Viewer();
+
+    public ViewerFactory() {
     }
     
     public static Viewer getInstace() {
-        return new ConsoleViewer();
+        return VIEWER_INSTANCE;
     }
     
 }
