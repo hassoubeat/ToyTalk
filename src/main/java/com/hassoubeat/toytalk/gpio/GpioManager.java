@@ -18,10 +18,10 @@ import lombok.Getter;
  * GPIOの処理を定義するクラス
  * @author hassoubeat
  */
-public class GPIO {
+public class GpioManager {
     
     // シングルトンインスタンス
-    private static final GPIO GPIO_INSTANCE = new GPIO();
+    private static final GpioManager GPIO_INSTANCE = new GpioManager();
     
     private final GpioController gpio;
     
@@ -54,7 +54,7 @@ public class GPIO {
     private final GpioPinDigitalInput SYNC_BUTTON;
     
     // コンストラクタ
-    private GPIO() {
+    private GpioManager() {
         gpio = GpioFactory.getInstance();
         
         // 各ピンの定義(同時にシャットダウン時の動作も合わせて定義する)
@@ -122,7 +122,7 @@ public class GPIO {
      * 
      * @return 
      */
-    public static GPIO getInstance(){
+    public static GpioManager getInstance(){
         return GPIO_INSTANCE;
     }   
 }

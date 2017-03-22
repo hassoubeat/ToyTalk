@@ -5,10 +5,17 @@
  */
 package com.hassoubeat.toytalk.daemon;
 
+import com.hassoubeat.toytalk.constract.MessageConst;
+import com.hassoubeat.toytalk.exception.ToyTalkException;
 import com.hassoubeat.toytalk.gpio.ToyTalkEvent;
+import com.hassoubeat.toytalk.gpio.Viewer;
+import com.hassoubeat.toytalk.gpio.ViewerFactory;
+import java.util.Timer;
 import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonContext;
 import org.apache.commons.daemon.DaemonInitException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -16,36 +23,49 @@ import org.apache.commons.daemon.DaemonInitException;
  */
 public class ToyTalkDaemon implements Daemon{
     
+    // ロガー
+    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
+    Viewer viewer = ViewerFactory.getInstance();
+    
     ToyTalkEvent toyTalkEvent;
     
     @Override
     public void init(DaemonContext dc) throws DaemonInitException, Exception {
-        System.out.println(this.getClass().getName() + ":init()");
+        logger.debug(this.getClass().getName() + ":init()");
         
-        // GPIOインスタンスの取得
-        toyTalkEvent = new ToyTalkEvent();
-        toyTalkEvent.startup();
+        try {
+            // GPIOインスタンスの取得
+            toyTalkEvent = new ToyTalkEvent();
+            toyTalkEvent.startup();
+        } catch (ToyTalkException ex) {
+            logger.error("{}.{}", MessageConst.SYSTEM_ERROR.getId(), MessageConst.SYSTEM_ERROR.getMessage(), ex);
+            viewer.displaySystemErrorView();
+        }
         
     }
 
     @Override
     public void start() throws Exception {
-        System.out.println(this.getClass().getName() + ":start()");
-        toyTalkEvent.run();
+        logger.debug(this.getClass().getName() + ":start()");
+        try {
+            toyTalkEvent.run();
+        } catch (ToyTalkException ex) {
+            logger.error("{}.{}", MessageConst.SYSTEM_ERROR.getId(), MessageConst.SYSTEM_ERROR.getMessage(), ex);
+            viewer.displaySystemErrorView();
+        }
         
     }
 
     @Override
     public void stop() throws Exception {
-        System.out.println(this.getClass().getName() + ":stop()");
-        
+        logger.debug(this.getClass().getName() + ":stop()");
         // GPIOインスタンスのシャットダウン
         toyTalkEvent.shutdown();
     }
 
     @Override
     public void destroy() {
-        System.out.println(this.getClass().getName() + ":destroy()");
+        logger.debug(this.getClass().getName() + ":destory()");
     }
     
 }

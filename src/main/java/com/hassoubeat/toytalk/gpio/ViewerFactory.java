@@ -16,7 +16,7 @@ public class ViewerFactory {
     public ViewerFactory() {
     }
     
-    public static Viewer getInstace() {
+    public static Viewer getInstance() {
         return VIEWER_INSTANCE;
     }
     

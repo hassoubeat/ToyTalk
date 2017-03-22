@@ -5,7 +5,7 @@
  */
 package com.hassoubeat.toytalk.util;
 
-import com.hassoubeat.toytalk.daemon.constract.EventRoopParamConst;
+import com.hassoubeat.toytalk.constract.EventRoopParamConst;
 
 /**
  * ビット演算のロジック

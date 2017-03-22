@@ -59,6 +59,13 @@ public class RestEvent {
 
     public RestEvent() {
     }
+
+    @Override
+    public String toString() {
+        return "RestEvent{" + "id=" + id + ", name=" + name + ", content=" + content + ", startDate=" + startDate + ", endDate=" + endDate + ", roop=" + roop + ", roopEndDate=" + roopEndDate + ", toyId=" + toyId + ", accountId=" + accountId + ", FacetId=" + FacetId + '}';
+    }
+    
+    
     
     
     

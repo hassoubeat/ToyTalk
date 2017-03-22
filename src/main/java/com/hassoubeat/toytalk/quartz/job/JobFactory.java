@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JobFactory {
     // ロガー
-    Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static Logger logger = LoggerFactory.getLogger(JobFactory.class);
     
     private static final String JOB = "job";
     
@@ -38,6 +38,8 @@ public class JobFactory {
         
         // ジョブ名の生成
         String jobName = JOB + Integer.toString(restEvent.getId());
+        
+        logger.info(restEvent.toString());
         
         // ジョブが属するグループ名の取得
         String jobGroupName = "";
@@ -60,6 +62,10 @@ public class JobFactory {
         job.getJobDataMap().put("eventContent", restEvent.getContent());
         
         return job;
+    }
+    
+    static public JobDetail getEventFetchJob() {
+        return newJob(EventFetchJob.class).withIdentity("eventFetchJob", "job_event_fetch_group").build();
     }
     
 }

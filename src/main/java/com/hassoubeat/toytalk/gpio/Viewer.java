@@ -42,6 +42,8 @@ public abstract class Viewer {
     final static public String NETWORK_UNCONNECT_VIEW = "network_unconnect_view";
     // シャットダウン画面のID
     final static public String SHUTDOWN_VIEW = "shutdown_view";
+    // システムエラー画面のID
+    final static public String SYSTEM_ERROR_VIEW = "system_error_view";
     
     // メニュー画面に表示するメニュー一覧
     final static public List<String> MODE_SELECT_MENU_LIST = Arrays.asList("Event Data Reset", "Toy Init", "Return Top");
@@ -117,7 +119,16 @@ public abstract class Viewer {
      * シャットダウン画面を表示する
      */
     abstract public void displayShutdownView();
-
+    
+    /**
+     * システムエラー画面を表示する
+     */
+    abstract public void displaySystemErrorView();
+    
+    /**
+     * 画面をクリアする
+     */
+    abstract public void clearView();
     
     public String getShowingViewId() {
         return showingViewId;
@@ -134,6 +145,8 @@ public abstract class Viewer {
     public void setSelectingMenuItemIndex(int selectingMenuItemIndex) {
         this.selectingMenuItemIndex = selectingMenuItemIndex;
     }
+    
+    
     
     
 }

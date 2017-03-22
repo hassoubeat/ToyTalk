@@ -5,11 +5,15 @@
  */
 package com.hassoubeat.toytalk.quartz.job;
 
+import com.hassoubeat.toytalk.constract.MessageConst;
+import com.hassoubeat.toytalk.exception.ToyTalkException;
 import java.io.IOException;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -17,17 +21,25 @@ import org.quartz.JobExecutionException;
  */
 public class JsayJob implements Job{
     
+    // ロガー
+    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
+    
+    private final String COMMAND = "jsay";
+    
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        Runtime r = Runtime.getRuntime();
+        Runtime runTime = Runtime.getRuntime();
+        String jsayCommand = "";
         try {
             JobDataMap jobDataMap = context.getJobDetail().getJobDataMap();
-            Process process = r.exec("jsay " + jobDataMap.get("eventName") + " " + jobDataMap.get("eventContent"));
-            // TODO ロガーに実行したコマンドを出力
-            System.out.println("jsay " + jobDataMap.get("eventName") + " " + jobDataMap.get("eventContent"));
+            jsayCommand = COMMAND + " " + jobDataMap.get("eventName") + "・" + jobDataMap.get("eventContent");
+            Process process = runTime.exec(jsayCommand);
+            // ロガーに実行したコマンドを出力
+            logger.info("{}:{} COMMAND:{}", MessageConst.SUCCESS_RUN_COMMAND.getId(), MessageConst.SUCCESS_RUN_COMMAND.getMessage(), jsayCommand);
         } catch (IOException ex) {
-            // TODO 実行失敗時の挙動定義
-            System.out.println("失敗した失敗した失敗した失敗した失敗した失敗した失敗した失敗した失敗した失敗した");
+            // 実行失敗時の挙動定義
+            logger.error("{}:{} COMMAND:{}", MessageConst.FAILED_RUN_COMMAND.getId(), MessageConst.FAILED_RUN_COMMAND.getMessage(), jsayCommand);
+            throw new ToyTalkException();
         }
 
     }

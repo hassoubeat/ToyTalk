@@ -9,6 +9,7 @@ import com.pi4j.component.lcd.LCDTextAlignment;
 import com.pi4j.component.lcd.impl.GpioLcdDisplay;
 import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.gpio.RaspiPin;
+import static java.lang.Thread.sleep;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -59,7 +60,6 @@ public class Lcd16_2Viewer extends Viewer{
     @Override
     public void displayTopView() {
         // 【トップ画面】を表示する
-        lcd.clear();
         LocalDateTime now = LocalDateTime.now();
         lcd.write(LCD_ROW1, now.format(DateTimeFormatter.ofPattern("MM/dd HH:mm:ss")));
         lcd.write(LCD_ROW2, "Top View");
@@ -82,6 +82,11 @@ public class Lcd16_2Viewer extends Viewer{
         lcd.write(LCD_ROW1, "Bad RequestParam");
         lcd.write(LCD_ROW2, "PleaseCheckConf");
         setShowingViewId(REQUEST_PARAM_INVALID_VIEW);
+        try {
+            sleep(4000);
+        } catch (InterruptedException iex) {
+            iex.printStackTrace();
+        }
     }
     
     @Override
@@ -91,6 +96,11 @@ public class Lcd16_2Viewer extends Viewer{
         lcd.write(LCD_ROW1, "Access Approval");
         lcd.write(LCD_ROW2, "From ToyManager");
         setShowingViewId(ACCESS_FILTER_UN_APPROVAL_VIEW);
+        try {
+            sleep(4000);
+        } catch (InterruptedException iex) {
+            iex.printStackTrace();
+        }
     }
     
     @Override
@@ -115,13 +125,18 @@ public class Lcd16_2Viewer extends Viewer{
         lcd.write(LCD_ROW1, "Net UnConnect", LCDTextAlignment.ALIGN_CENTER);
         lcd.write(LCD_ROW2, "Please Wifi Set", LCDTextAlignment.ALIGN_CENTER);
         setShowingViewId(NETWORK_UNCONNECT_VIEW);
+        try {
+            sleep(4000);
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
     }
     
     @Override
     public void displayEventDataResetView() {
         // 【イベント再取得画面】を表示する
         lcd.clear();
-        lcd.write(LCD_ROW1, "Event Reseting...", LCDTextAlignment.ALIGN_CENTER);
+        lcd.write(LCD_ROW1, "Event Reseting..s", LCDTextAlignment.ALIGN_CENTER);
         lcd.write(LCD_ROW2, "Please Wait", LCDTextAlignment.ALIGN_CENTER);
         setShowingViewId(EVENT_RESET_MODE);
     }
@@ -138,5 +153,30 @@ public class Lcd16_2Viewer extends Viewer{
         lcd.write(LCD_ROW1, "Shutdown...");
         lcd.clear();
         setShowingViewId(SHUTDOWN_VIEW);
+        try {
+            sleep(3000);
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
     }
+    
+    @Override
+    public void displaySystemErrorView() {
+        // 【システムエラー画面】を表示する
+        lcd.clear();
+        lcd.write(LCD_ROW1, "System Error");
+        setShowingViewId(SYSTEM_ERROR_VIEW);
+        try {
+            sleep(3000);
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void clearView() {
+        lcd.clear();
+    }
+    
+    
 }

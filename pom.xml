@@ -75,7 +75,57 @@
             <artifactId>jersey-media-jaxb</artifactId>
             <version>2.17</version>
         </dependency>
+<!--        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-processing</artifactId>
+            <version>2.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-moxy</artifactId>
+            <version>2.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <version>2.13</version>
+        </dependency>-->
     </dependencies>
+    <!-- 環境毎の設定ファイル定義 -->
+    <profiles>
+        <!-- ローカル用設定(デフォルトはこれ) -->
+        <profile>
+            <id>local</id>
+            <properties>
+                <!-- RestAPIのリソースパス -->
+                <rest.resource.path>http://localhost:8080/ToyManager/webapi/</rest.resource.path>
+            </properties>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+        <profile>
+            <!-- 本番用設定 -->
+            <id>aws</id>
+            <properties>
+                <!-- RestAPIのリソースパス -->
+                <rest.resource.path>http://52.196.234.137:8080/ToyManager/webapi/</rest.resource.path>
+            </properties>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+    </profiles>
     <build>
         <plugins>
           <plugin>
@@ -98,9 +148,28 @@
                 <manifest>
                   <mainClass>com.hassoubeat.toytalk.daemon.ToyTalkDaemon</mainClass>
                 </manifest>
+                <manifestEntries>
+                    <Class-Path>./settings/</Class-Path>
+                </manifestEntries>
               </archive>
             </configuration>
           </plugin>
+<!--          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>2.4</version>
+            <configuration>
+              <archive>
+                <manifest>
+                  <mainClass>com.hassoubeat.toytalk.daemon.ToyTalkDaemon</mainClass>
+                  <addClasspath>true</addClasspath>
+                </manifest>
+                <manifestEntries>
+                  <Class-Path>./</Class-Path>
+                </manifestEntries>
+              </archive>
+            </configuration>
+          </plugin>-->
         </plugins>
         <resources>
             <resource>

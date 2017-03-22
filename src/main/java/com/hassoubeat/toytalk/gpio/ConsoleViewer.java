@@ -136,4 +136,14 @@ public class ConsoleViewer extends Viewer{
         System.out.println("");
         System.out.println("");
     }
+
+    @Override
+    public void displaySystemErrorView() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void clearView() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

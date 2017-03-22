@@ -5,11 +5,20 @@
  */
 package com.hassoubeat.toytalk.quartz.trigger;
 
-import com.hassoubeat.toytalk.daemon.constract.EventRoopParamConst;
+import com.hassoubeat.toytalk.constract.EventRoopParamConst;
+import com.hassoubeat.toytalk.constract.MessageConst;
 import com.hassoubeat.toytalk.entity.RestEvent;
 import com.hassoubeat.toytalk.util.BitLogic;
+import com.hassoubeat.toytalk.util.UtilLogic;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.TimeZone;
 import static org.quartz.CalendarIntervalScheduleBuilder.calendarIntervalSchedule;
-import org.quartz.SimpleTrigger;
+import static org.quartz.CronScheduleBuilder.cronSchedule;
+import org.quartz.JobDetail;
 import org.quartz.Trigger;
 import static org.quartz.TriggerBuilder.newTrigger;
 import org.slf4j.Logger;
@@ -22,10 +31,11 @@ import org.slf4j.LoggerFactory;
 public class TriggerFactory {
     
     // ロガー
-    Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static Logger logger = LoggerFactory.getLogger(TriggerFactory.class);
     
     private static EventRoopParamConst erpConst = new EventRoopParamConst();
     private static BitLogic bitLogic = BitLogic.getInstace();
+    private static UtilLogic utilLogic = UtilLogic.getInstance();
     private static final String TRIGGER = "trigger";
     
     // Triggerが属するグループ名を定義する
@@ -37,10 +47,11 @@ public class TriggerFactory {
     /**
      * イベントの内容によって適したTriggerを発行する
      * @param restEvent 
+     * @param tyingJob トリガーに紐付けるJob 
      * @return 動的生成したトリガー
      */
-    static public Trigger getTrigger(RestEvent restEvent) {
-        Trigger trigger = null;
+    static public List<Trigger> getTrigger(RestEvent restEvent, JobDetail tyingJob) {
+        List<Trigger> triggers = new ArrayList();
         
         int roop = restEvent.getRoop();
         
@@ -64,8 +75,9 @@ public class TriggerFactory {
         
         if (!bitLogic.bitCheck(roop, erpConst.IS_ROOP)) {
             // イベントの繰り返しが無効の場合
-            trigger = (SimpleTrigger) newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).build();
-            return trigger;
+            triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).build());
+            logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName, triggerGroupName, "ループなし");
+            return triggers;
         } 
         
         // 以下、イベントの繰り返しが有効の場合
@@ -76,20 +88,117 @@ public class TriggerFactory {
         if (bitLogic.bitCheck(roop, erpConst.IS_EVERY_DAY_ROOP)) {
             // 日時繰り返しの場合
             
-            if (restEvent.getEndDate() == null) {
-                // 繰り返しの終わりが設定されていなかった場合
-                trigger = newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).withSchedule(calendarIntervalSchedule().withIntervalInDays(roopInterval)).build();
+            if (restEvent.getRoopEndDate() == null) {
+                // ループの終わりが設定されていなかった場合
+                triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).withSchedule(calendarIntervalSchedule().withIntervalInDays(roopInterval).withMisfireHandlingInstructionDoNothing()).build());
+                logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName, triggerGroupName, "日時ループ");
             } else {
-                // 繰り返しの終わりが設定されていた場合
-                trigger = newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).endAt(restEvent.getEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInDays(roopInterval)).build();
+                // ループの終わりが設定されていた場合
+                triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInDays(roopInterval).withMisfireHandlingInstructionDoNothing()).build());
+                logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName, triggerGroupName, "日時ループ");
             }
-            
-            return trigger;
         }
 
         if (bitLogic.bitCheck(roop, erpConst.IS_EVERY_WEEK_ROOP)) {
             // 週次繰り返しの場合
-            // TODO 曜日に合わせてCalenderIntervalTriggerを複数返却するハメになるので、こいつだけ独自実装にする必要ありかも
+            
+            // イベント開始日時の曜日を取得する
+            int eventStartDoW = utilLogic.getDayOfWeek(restEvent.getStartDate());
+            
+            // 曜日指定の確認
+            if (bitLogic.bitCheck(roop, erpConst.IS_ROOP_SUNDAY)) {
+                // 日曜日が指定されていた場合
+                Date sundayDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.SUNDAY - eventStartDoW);
+                if (restEvent.getRoopEndDate() == null) {
+                    // 繰り返しの終わりが設定されていなかった場合
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.SUNDAY, triggerGroupName).startAt(sundayDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.SUNDAY, triggerGroupName, "週ループ");
+                } else {
+                    // 繰り返しの終わりが設定されていた場合
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.SUNDAY, triggerGroupName).startAt(sundayDate).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.SUNDAY, triggerGroupName, "週ループ");
+                }
+            }
+            if (bitLogic.bitCheck(roop, erpConst.IS_ROOP_MONDAY)) {
+                // 月曜日が指定されていた場合
+                Date mondayDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.MONDAY - eventStartDoW);
+                if (restEvent.getRoopEndDate() == null) {
+                    // 繰り返しの終わりが設定されていなかった場合
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.MONDAY, triggerGroupName).startAt(mondayDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.MONDAY, triggerGroupName, "週ループ");
+                } else {
+                    // 繰り返しの終わりが設定されていた場合
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.MONDAY, triggerGroupName).startAt(mondayDate).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.MONDAY, triggerGroupName, "週ループ");
+                }
+            }
+            if (bitLogic.bitCheck(roop, erpConst.IS_ROOP_TUESDAY)) {
+                // 火曜日が指定されていた場合
+                Date tuesdayDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.TUESDAY - eventStartDoW);
+                if (restEvent.getRoopEndDate() == null) {
+                    // 繰り返しの終わりが設定されていなかった場合
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.TUESDAY, triggerGroupName).startAt(tuesdayDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.TUESDAY, triggerGroupName, "週ループ");
+                } else {
+                    // 繰り返しの終わりが設定されていた場合
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.TUESDAY, triggerGroupName).startAt(tuesdayDate).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.TUESDAY, triggerGroupName, "週ループ");
+                }
+            }
+            if (bitLogic.bitCheck(roop, erpConst.IS_ROOP_WEDNESDAY)) {
+                // 水曜日が指定されていた場合
+                Date webnesDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.WEDNESDAY - eventStartDoW);
+                if (restEvent.getRoopEndDate() == null) {
+                    // 繰り返しの終わりが設定されていなかった場合
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.WEDNESDAY, triggerGroupName).startAt(webnesDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.WEDNESDAY, triggerGroupName, "週ループ");
+                } else {
+                    // 繰り返しの終わりが設定されていた場合
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.WEDNESDAY, triggerGroupName).startAt(webnesDate).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.WEDNESDAY, triggerGroupName, "週ループ");
+                }
+            }
+            if (bitLogic.bitCheck(roop, erpConst.IS_ROOP_THURSDAY)) {
+                // 木曜日が指定されていた場合
+                Date thursDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.THURSDAY - eventStartDoW);
+                if (restEvent.getRoopEndDate() == null) {
+                    // 繰り返しの終わりが設定されていなかった場合
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.THURSDAY, triggerGroupName).startAt(thursDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.THURSDAY, triggerGroupName, "週ループ");
+                } else {
+                    // 繰り返しの終わりが設定されていた場合
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.THURSDAY, triggerGroupName).startAt(thursDate).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.THURSDAY, triggerGroupName, "週ループ");
+                }
+            }
+            if (bitLogic.bitCheck(roop, erpConst.IS_ROOP_FRIDAY)) {
+                // 金曜日が指定されていた場合
+                Date fridayDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.FRIDAY - eventStartDoW);
+                if (restEvent.getRoopEndDate() == null) {
+                    // 繰り返しの終わりが設定されていなかった場合
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.FRIDAY, triggerGroupName).startAt(fridayDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.FRIDAY, triggerGroupName, "週ループ");
+                } else {
+                    // 繰り返しの終わりが設定されていた場合
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.FRIDAY, triggerGroupName).startAt(fridayDate).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.FRIDAY, triggerGroupName, "週ループ");
+                }
+            }
+            if (bitLogic.bitCheck(roop, erpConst.IS_ROOP_SATURDAY)) {
+                // 土曜日が指定されていた場合
+                Date saturday = utilLogic.calDate(restEvent.getStartDate(), Calendar.SATURDAY - eventStartDoW);
+                if (restEvent.getRoopEndDate() == null) {
+                    // 繰り返しの終わりが設定されていなかった場合
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.SATURDAY, triggerGroupName).startAt(saturday).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).inTimeZone(TimeZone.getTimeZone("Asia/Tokyo")).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.SATURDAY, triggerGroupName, "週ループ");
+                } else {
+                    // 繰り返しの終わりが設定されていた場合
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.SATURDAY, triggerGroupName).startAt(saturday).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).inTimeZone(TimeZone.getTimeZone("Asia/Tokyo")).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.SATURDAY, triggerGroupName, "週ループ");
+                }
+            }
+            
+            return triggers;
         }
         
         if (bitLogic.bitCheck(roop, erpConst.IS_EVERY_MOUTH_ROOP)) {
@@ -98,15 +207,17 @@ public class TriggerFactory {
             if (bitLogic.bitCheck(roop, erpConst.IS_ROOP_STANDARD_DAY)) {
                 // 日付基準の繰り返しの場合(毎月 N 日)
                 
-                if (restEvent.getEndDate() == null) {
+                if (restEvent.getRoopEndDate() == null) {
                     // 繰り返しの終わりが設定されていなかった場合
-                    trigger = newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).withSchedule(calendarIntervalSchedule().withIntervalInMonths(roopInterval)).build();
+                    triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).withSchedule(calendarIntervalSchedule().withIntervalInMonths(roopInterval).withMisfireHandlingInstructionDoNothing()).build());
+                    logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName, triggerGroupName, "月ループ");
                 } else {
                     // 繰り返しの終わりが設定されていた場合
-                    trigger = newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).endAt(restEvent.getEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInMonths(roopInterval)).build();
+                    triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInMonths(roopInterval).withMisfireHandlingInstructionDoNothing()).build());
+                    logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName, triggerGroupName, "月ループ");
                 }
                 
-                return trigger;
+                return triggers;
                 
             } else {
                 // TODO 曜日基準の繰り返しの場合(毎月 第 N 曜日)
@@ -117,31 +228,35 @@ public class TriggerFactory {
         if (bitLogic.bitCheck(roop, erpConst.IS_EVERY_YEAR_ROOP)) {
             // 年次繰り返しの場合
             
-            if (restEvent.getEndDate() == null) {
+            if (restEvent.getRoopEndDate() == null) {
                 // 繰り返しの終わりが設定されていなかった場合
-                trigger = newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).withSchedule(calendarIntervalSchedule().withIntervalInYears(roopInterval)).build();
+                triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).withSchedule(calendarIntervalSchedule().withIntervalInYears(roopInterval).withMisfireHandlingInstructionDoNothing()).build());
+                logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName, triggerGroupName, "年ループ");
             } else {
                 // 繰り返しの終わりが設定されていた場合
-                trigger = newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).endAt(restEvent.getEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInYears(roopInterval)).build();
+                triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInYears(roopInterval).withMisfireHandlingInstructionDoNothing()).build());
+                logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName, triggerGroupName, "年ループ");
             }
                 
-            return trigger;
+            return triggers;
         }
         
-        return trigger;
+        return triggers;
     }
     
-
-    /**
-     * 複数のトリガーを必要とするイベントであるかをチェックする
-     * @param restEvent 
-     * @return 複数のトリガーが必要とするイベントだった場合(true)
-     */
-    public static boolean isEventReturnMultiTrigger(RestEvent restEvent) {
-        boolean isExist = false;
+    
+    public static Trigger getEventFetchTrigger() {
+        ResourceBundle properties = ResourceBundle.getBundle("toytalk");
+        String eventFetchInteval = properties.getString("EventFetchInterval");
         
+        if (eventFetchInteval == null) {
+            // nullだった場合、デフォルトの15分をセット
+            eventFetchInteval = "15";
+        }
+        Trigger trigger = newTrigger().withIdentity("eventFetchTrigger", "trigger_event_fetch_group").startNow().withSchedule(cronSchedule("0 */" + eventFetchInteval + " * * * ?").withMisfireHandlingInstructionDoNothing()).build();
+        logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{} EVENT_FETCH_INTERVAL:{}min" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), "eventFetchTrigger", "trigger_event_fetch_group", eventFetchInteval);
+        return trigger;
         
-        return isExist;
     }
     
     /**

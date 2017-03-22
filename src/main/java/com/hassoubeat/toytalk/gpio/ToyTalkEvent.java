@@ -5,10 +5,10 @@
  */
 package com.hassoubeat.toytalk.gpio;
 
-import com.hassoubeat.toytalk.daemon.constract.MessageConst;
+import com.hassoubeat.toytalk.constract.MessageConst;
 import com.hassoubeat.toytalk.entity.RestEvent;
 import com.hassoubeat.toytalk.quartz.QuartzManager;
-import com.hassoubeat.toytalk.rest.RestCall;
+import com.hassoubeat.toytalk.rest.RestClient;
 import com.hassoubeat.toytalk.util.UtilLogic;
 import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
@@ -29,21 +29,23 @@ public class ToyTalkEvent {
     // ロガー
     private static final Logger logger = LoggerFactory.getLogger(ToyTalkEvent.class);
     // GPIO処理の管理クラス(シングルトン)
-    private GPIO gpio;
+    private GpioManager gpio;
     // 表示処理の管理クラス
     private Viewer viewer;
     // イベントの管理クラス
     private QuartzManager quartzManager;
     // Utilロジック
-    private UtilLogic utilLogic = UtilLogic.getInstace();
+    private UtilLogic utilLogic;
     // RestCallクラス
-    private RestCall restCall = new RestCall();
+    private RestClient restClient;
 
     // コンストラクタ
     public ToyTalkEvent() {
-        gpio = GPIO.getInstance();
-        viewer = ViewerFactory.getInstace();
-        quartzManager = new QuartzManager();
+        gpio = GpioManager.getInstance();
+        viewer = ViewerFactory.getInstance();
+        quartzManager = QuartzManager.getInstance();
+        utilLogic = UtilLogic.getInstance();
+        restClient = RestClient.getInstance();
         
         // ボタンのイベント定義
         addButtonEvent();
@@ -52,8 +54,8 @@ public class ToyTalkEvent {
     /**
      * ToyTalk起動時処理
      */
-    // TODO インターセプターの検討
-    public void startup() throws InterruptedException {
+    // インターセプターの検討
+    public void startup()  {
         // 電源LEDの点灯(POWER_LED)
         gpio.powerLedOn();
         gpio.connectLedOn();
@@ -65,24 +67,25 @@ public class ToyTalkEvent {
         
         if (!isNetworkConnection) {
             // ネットワークが未接続(Wifiなどが設定されていなかった場合)
-            viewer.displayNetworkUnconnectView();
             logger.warn("{}:{}", MessageConst.UN_CONNECTED_NETWORK.getId(), MessageConst.UN_CONNECTED_NETWORK.getMessage());
-            sleep(4000);
+            viewer.displayNetworkUnconnectView();
             return;
         } else {
             // ネットワーク接続済
             
             // イベントの取得
-            List<RestEvent> restEventList = restCall.fetchAllEvent();
+            List<RestEvent> restEventList = restClient.fetchAllEvent();
             
-            if (restEventList == null) {
-                // イベントが取得できなかった場合
-                return;
+            if (restEventList != null) {
+                // イベントが取得できた場合
+                for (RestEvent restEvent: restEventList) {
+                    restEvent.toString();
+                    quartzManager.addEvent(restEvent);
+                }
             }
-             
-            for (RestEvent restEvent: restEventList) {
-                quartzManager.addEvent(restEvent);
-            }
+
+            // イベントの定期取得イベントを追加する
+            quartzManager.addFetchEvent();
         }
     }
     
@@ -94,11 +97,12 @@ public class ToyTalkEvent {
         viewer.displayTopView();
         while (viewer.getShowingViewId().equals(Viewer.TOP_VIEW)) {
             // TOP画面が表示され続けている間、現在時刻を表示しつづける
+            viewer.clearView();
             viewer.displayTopView();
             try {
                 sleep(1000);
             } catch (InterruptedException ex) {
-                // TODO
+                ex.printStackTrace();
             }
         }
     }
@@ -110,9 +114,9 @@ public class ToyTalkEvent {
         // シャットダウン画面を表示して、シャットダウン処理を実行する
         viewer.displayShutdownView();
         try {
-            sleep(1000);
+            sleep(3000);
         } catch (InterruptedException ex) {
-            // TODO
+            ex.printStackTrace();
         }
         gpio.shutdown();
     }
@@ -186,10 +190,11 @@ public class ToyTalkEvent {
                             switch(selectingMenu) {
                                 case Viewer.EVENT_RESET_MODE:
                                     // イベント再取得モードの実行
+                                    // TODO LED点灯
                                     viewer.displayEventDataResetView();
                                     quartzManager.eventClear();
                                     List<RestEvent> restEventList;
-                                    restEventList = restCall.fetchAllEvent();
+                                    restEventList = restClient.fetchAllEvent();
                                     if (restEventList == null) {
                                         break;
                                     }
@@ -203,7 +208,7 @@ public class ToyTalkEvent {
                                     break;
                                 case Viewer.RETURN_TOP:
                                     // トップ画面に遷移する
-//                                    run();
+                                    run();
                             }
                             
                             break;
@@ -248,7 +253,6 @@ public class ToyTalkEvent {
                     switch(viewer.getShowingViewId()) {
                         case Viewer.TOP_VIEW:
                             // TODO 差分同期を実施する
-                            
                             break;
                         default:
                             // 動作が指定されていない画面だった時(特になにもしない)
