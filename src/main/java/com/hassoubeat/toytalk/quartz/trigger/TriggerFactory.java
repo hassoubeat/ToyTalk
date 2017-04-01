@@ -108,7 +108,7 @@ public class TriggerFactory {
             // 曜日指定の確認
             if (bitLogic.bitCheck(roop, erpConst.IS_ROOP_SUNDAY)) {
                 // 日曜日が指定されていた場合
-                Date sundayDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.SUNDAY - eventStartDoW);
+                Date sundayDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.SUNDAY - eventStartDoW, Calendar.DAY_OF_MONTH);
                 if (restEvent.getRoopEndDate() == null) {
                     // 繰り返しの終わりが設定されていなかった場合
                     triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.SUNDAY, triggerGroupName).startAt(sundayDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
@@ -121,7 +121,7 @@ public class TriggerFactory {
             }
             if (bitLogic.bitCheck(roop, erpConst.IS_ROOP_MONDAY)) {
                 // 月曜日が指定されていた場合
-                Date mondayDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.MONDAY - eventStartDoW);
+                Date mondayDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.MONDAY - eventStartDoW, Calendar.DAY_OF_MONTH);
                 if (restEvent.getRoopEndDate() == null) {
                     // 繰り返しの終わりが設定されていなかった場合
                     triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.MONDAY, triggerGroupName).startAt(mondayDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
@@ -134,7 +134,7 @@ public class TriggerFactory {
             }
             if (bitLogic.bitCheck(roop, erpConst.IS_ROOP_TUESDAY)) {
                 // 火曜日が指定されていた場合
-                Date tuesdayDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.TUESDAY - eventStartDoW);
+                Date tuesdayDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.TUESDAY - eventStartDoW, Calendar.DAY_OF_MONTH);
                 if (restEvent.getRoopEndDate() == null) {
                     // 繰り返しの終わりが設定されていなかった場合
                     triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.TUESDAY, triggerGroupName).startAt(tuesdayDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
@@ -147,7 +147,7 @@ public class TriggerFactory {
             }
             if (bitLogic.bitCheck(roop, erpConst.IS_ROOP_WEDNESDAY)) {
                 // 水曜日が指定されていた場合
-                Date webnesDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.WEDNESDAY - eventStartDoW);
+                Date webnesDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.WEDNESDAY - eventStartDoW, Calendar.DAY_OF_MONTH);
                 if (restEvent.getRoopEndDate() == null) {
                     // 繰り返しの終わりが設定されていなかった場合
                     triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.WEDNESDAY, triggerGroupName).startAt(webnesDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
@@ -160,7 +160,7 @@ public class TriggerFactory {
             }
             if (bitLogic.bitCheck(roop, erpConst.IS_ROOP_THURSDAY)) {
                 // 木曜日が指定されていた場合
-                Date thursDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.THURSDAY - eventStartDoW);
+                Date thursDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.THURSDAY - eventStartDoW, Calendar.DAY_OF_MONTH);
                 if (restEvent.getRoopEndDate() == null) {
                     // 繰り返しの終わりが設定されていなかった場合
                     triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.THURSDAY, triggerGroupName).startAt(thursDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
@@ -173,7 +173,7 @@ public class TriggerFactory {
             }
             if (bitLogic.bitCheck(roop, erpConst.IS_ROOP_FRIDAY)) {
                 // 金曜日が指定されていた場合
-                Date fridayDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.FRIDAY - eventStartDoW);
+                Date fridayDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.FRIDAY - eventStartDoW, Calendar.DAY_OF_MONTH);
                 if (restEvent.getRoopEndDate() == null) {
                     // 繰り返しの終わりが設定されていなかった場合
                     triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.FRIDAY, triggerGroupName).startAt(fridayDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
@@ -186,7 +186,7 @@ public class TriggerFactory {
             }
             if (bitLogic.bitCheck(roop, erpConst.IS_ROOP_SATURDAY)) {
                 // 土曜日が指定されていた場合
-                Date saturday = utilLogic.calDate(restEvent.getStartDate(), Calendar.SATURDAY - eventStartDoW);
+                Date saturday = utilLogic.calDate(restEvent.getStartDate(), Calendar.SATURDAY - eventStartDoW, Calendar.DAY_OF_MONTH);
                 if (restEvent.getRoopEndDate() == null) {
                     // 繰り返しの終わりが設定されていなかった場合
                     triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.SATURDAY, triggerGroupName).startAt(saturday).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).inTimeZone(TimeZone.getTimeZone("Asia/Tokyo")).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
@@ -253,7 +253,8 @@ public class TriggerFactory {
             // nullだった場合、デフォルトの15分をセット
             eventFetchInteval = "15";
         }
-        Trigger trigger = newTrigger().withIdentity("eventFetchTrigger", "trigger_event_fetch_group").startNow().withSchedule(cronSchedule("0 */" + eventFetchInteval + " * * * ?").withMisfireHandlingInstructionDoNothing()).build();
+        // 優先度最低(1 ※ デフォルトは5)でトリガーを設定する(実行が他のトリガーと被ると、先にイベントが全削除されて実行されない恐れがあるため)
+        Trigger trigger = newTrigger().withIdentity("eventFetchTrigger", "trigger_event_fetch_group").startNow().withSchedule(cronSchedule("0 */" + eventFetchInteval + " * * * ?").withMisfireHandlingInstructionDoNothing()).withPriority(1).build();
         logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{} EVENT_FETCH_INTERVAL:{}min" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), "eventFetchTrigger", "trigger_event_fetch_group", eventFetchInteval);
         return trigger;
         

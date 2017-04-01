@@ -35,6 +35,7 @@ public class UtilLogic {
     private final String ROT_NUMBER;
     private final String ACCESS_TOKEN;
     private final String TOY_TALK_VERSION;
+    private final int EVENT_FETCH_TERM;
     
     private UtilLogic() {
         // プロパティファイルから各種パラメータの取得
@@ -42,6 +43,7 @@ public class UtilLogic {
         ROT_NUMBER = properties.getString("RotNumber");
         ACCESS_TOKEN = properties.getString("AccessToken");
         TOY_TALK_VERSION = properties.getString("ToyTalkVersion");
+        EVENT_FETCH_TERM = Integer.parseInt(properties.getString("EventFetchTerm"));
     }
     
     /**
@@ -66,6 +68,14 @@ public class UtilLogic {
      */
     public String getToyTalkVersion() {
         return TOY_TALK_VERSION;
+    }
+    
+    /**
+     * イベントの取得期間を取得する
+     * @return int APIで取得する
+     */
+    public int getEventFetchTerm() {
+        return EVENT_FETCH_TERM;
     }
     
     /**
@@ -131,12 +141,30 @@ public class UtilLogic {
      * 引数で渡された日付から日付の計算を実施する
      * @param targetDate 計算を行うDate型
      * @param calParam 計算する値
+     * @param calDateType 計算するタイプ(日/週/月/年単位で指定)
      * @return 
      */
-    public Date calDate(Date targetDate, int calParam) {
+    public Date calDate(Date targetDate, int calParam, int calDateType) {
         Calendar calender = Calendar.getInstance();
         calender.setTime(targetDate);
-        calender.add(Calendar.DAY_OF_MONTH, calParam);
+        switch (calDateType) {
+            case Calendar.DAY_OF_MONTH:
+                // 日
+                calender.add(Calendar.DAY_OF_MONTH, calParam);
+                break;
+            case Calendar.WEEK_OF_MONTH:
+                // 週
+                calender.add(Calendar.WEEK_OF_MONTH, calParam);
+                break;
+            case Calendar.MONTH:
+                // 月
+                calender.add(Calendar.MONTH, calParam);
+                break;
+            case Calendar.YEAR:
+                // 年
+                calender.add(Calendar.YEAR, calParam);
+                break;
+        }
         return calender.getTime();
     }
     

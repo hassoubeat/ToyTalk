@@ -34,13 +34,15 @@ public class JsayJob implements Job{
             JobDataMap jobDataMap = context.getJobDetail().getJobDataMap();
             jsayCommand = COMMAND + " " + jobDataMap.get("eventName") + "・" + jobDataMap.get("eventContent");
             Process process = runTime.exec(jsayCommand);
+            // プロセスの実行が完了するまで、待機する
+            process.waitFor();
+            
             // ロガーに実行したコマンドを出力
             logger.info("{}:{} COMMAND:{}", MessageConst.SUCCESS_RUN_COMMAND.getId(), MessageConst.SUCCESS_RUN_COMMAND.getMessage(), jsayCommand);
-        } catch (IOException ex) {
+        } catch (IOException | InterruptedException ex) {
             // 実行失敗時の挙動定義
             logger.error("{}:{} COMMAND:{}", MessageConst.FAILED_RUN_COMMAND.getId(), MessageConst.FAILED_RUN_COMMAND.getMessage(), jsayCommand);
             throw new ToyTalkException();
         }
-
     }
 }

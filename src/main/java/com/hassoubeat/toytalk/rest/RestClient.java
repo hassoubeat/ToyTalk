@@ -11,8 +11,11 @@ import com.hassoubeat.toytalk.gpio.GpioManager;
 import com.hassoubeat.toytalk.gpio.ToyTalkEvent;
 import com.hassoubeat.toytalk.gpio.Viewer;
 import com.hassoubeat.toytalk.gpio.ViewerFactory;
+import com.hassoubeat.toytalk.quartz.QuartzManager;
 import com.hassoubeat.toytalk.util.UtilLogic;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -38,12 +41,10 @@ public class RestClient {
     
     // ロガー
     private static final Logger logger = LoggerFactory.getLogger(ToyTalkEvent.class);
-    // GPIO処理の管理クラス
     private GpioManager gpio = gpio = GpioManager.getInstance();
-    // 表示処理の管理クラス
     private Viewer viewer = ViewerFactory.getInstance();
-    // Utilロジック
     private UtilLogic utilLogic = UtilLogic.getInstance();
+    private final QuartzManager quartzManager = QuartzManager.getInstance();
     
     final private String HEADER_NAME_ROT_NUMBER = "rotNum";
     final private String HEADER_NAME_AUTHORICATION = "authorication";
@@ -76,12 +77,26 @@ public class RestClient {
         List<RestEvent> eventList = null;
         try {
             WebTarget webTarget = restClient.target(resourcePath).path(eventResoucePath);
-            eventList = webTarget.request(MediaType.APPLICATION_XML_TYPE).header(HEADER_NAME_ROT_NUMBER, rotNum).header(HEADER_NAME_AUTHORICATION, accessToken).header(HEADER_NAME_MAC_ADDRESS, macAddress).header(HEADER_NAME_TOY_TALK_VERSION, "").get(new GenericType<List<RestEvent>>(){});
+            
+            // プロパティファイルから取得期間と加算する
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date now = Calendar.getInstance().getTime();
+            Date end = utilLogic.calDate(now, utilLogic.getEventFetchTerm(), Calendar.DAY_OF_MONTH);
+            logger.debug("フェッチする期間" + now + "〜" + end);
+            eventList = webTarget
+                    .queryParam("start", formatter.format(now))
+                    .queryParam("end", formatter.format(end))
+                    .request(MediaType.APPLICATION_XML_TYPE)
+                    .header(HEADER_NAME_ROT_NUMBER, rotNum)
+                    .header(HEADER_NAME_AUTHORICATION, accessToken)
+                    .header(HEADER_NAME_MAC_ADDRESS, macAddress)
+                    .header(HEADER_NAME_TOY_TALK_VERSION, toyTalkVersion)
+                    .get(new GenericType<List<RestEvent>>(){});
             
             // RESTクライアントの時差の修正(UTCデフォルト時刻で返却されてくるため、現在のタイムゾーンに修正する)
-            for (int index = 0; index < eventList.size(); index++) {
-                eventList.set(index, retouchTimezone(eventList.get(index)));
-            }
+//            for (int index = 0; index < eventList.size(); index++) {
+//                eventList.set(index, retouchTimezone(eventList.get(index)));
+//            }
             
         } catch (NotAuthorizedException ex) {
             // TODO 認証失敗と期限切れを出し分ける
@@ -96,6 +111,8 @@ public class RestClient {
             logger.warn("{}:{} ROT_NUMBER:{}, ACCESS_TOKEN:{}, MAC_ADDRESS:{}", MessageConst.REQUEST_PARAM_INVALID.getId(), MessageConst.REQUEST_PARAM_INVALID.getMessage(), rotNum, accessToken, macAddress, ex);
             viewer.displayRequestParamInvalidView();
         } finally {
+            // イベントの定期取得イベントを追加する
+            quartzManager.addFetchEvent();
             // サーバ接続中LEDをOFFにする
             gpio.connectLedOff();
             // RESTクライアントを閉じる

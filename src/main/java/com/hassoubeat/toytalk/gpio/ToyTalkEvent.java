@@ -83,9 +83,6 @@ public class ToyTalkEvent {
                     quartzManager.addEvent(restEvent);
                 }
             }
-
-            // イベントの定期取得イベントを追加する
-            quartzManager.addFetchEvent();
         }
     }
     

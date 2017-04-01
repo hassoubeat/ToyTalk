@@ -140,6 +140,7 @@ public class QuartzManager {
         Trigger trigger = TriggerFactory.getEventFetchTrigger();
         try {
             scheduler.scheduleJob(job, trigger);
+            logger.info("{}.{} JOB_ID:{}, TRIGGER_ID:{}", MessageConst.SUCCESS_REGIST_EVENT_TO_SCHEDULE.getId(), MessageConst.SUCCESS_REGIST_EVENT_TO_SCHEDULE.getMessage(), job.getKey().getName(), trigger.getKey().getName());
         } catch (SchedulerException ex) {
             // ジョブ/イベントをスケジューラに登録失敗
             logger.warn("{}.{} JOB_ID:{}, TRIGGER_ID:{}" , MessageConst.FAILED_REGIST_EVENT_TO_SCHEDULE.getId(), MessageConst.FAILED_REGIST_EVENT_TO_SCHEDULE.getMessage(), job.getKey().toString(), trigger.getKey().toString());
