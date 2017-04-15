@@ -15,7 +15,8 @@ public enum MessageConst {
     SUCCESS_CLEAR_EVENT("TIR_01000002", "スケジューラに登録されたイベントを全削除しました。"),
     SUCCESS_CREATE_JOB("TIR_01000003", "Quartzジョブを生成しました。"),
     SUCCESS_CREATE_TRIGGER("TIR_01000004", "Quartzトリガーを生成しました。"),
-    SUCCESS_RUN_COMMAND("TIR_01000005", "コマンドを実行しました。"),
+    SUCCESS_RUN_COMMAND("TIR_01000005", "ジョブを実行しました。"),
+    SUCCESS_FACET_PROGRAM_DOWNLOAD("TIR_01000006", "ファセットプログラムのダウンロードが完了しました。"),
     
     // TER(ToyTalkで発生する想定内エラーメッセージ)
     UN_CONNECTED_NETWORK("TER_01000001", "インターネットに未接続です。"),
@@ -32,6 +33,8 @@ public enum MessageConst {
     SCHEDULER_CLEAR_ERROR("TCR_01000003", "Schedulerのクリアに失敗しました。"),
     MAC_ADDRESS_FETCH_ERROR("TCR_01000004", "Macアドレスの取得に失敗しました。"),
     FAILED_RUN_COMMAND("TCR_01000005", "コマンド実行が失敗しました"),
+    FAILED_GET_PROPERTY_FILE("TCR_01000006", "プロパティファイルの取得に失敗しました。"),
+    FAILED_SAVE_PROPERTY_FILE("TCR_01000007", "プロパティファイルの保存に失敗しました。"),
     ;
     
     private final String id;

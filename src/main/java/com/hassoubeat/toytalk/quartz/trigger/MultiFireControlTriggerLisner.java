@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * トリガーの発報を制御し、同時に処理を実行するを防止するトリガーリスナー(キュー的にFIFOで実行される)
+ * トリガーの発報を制御し、同時に処理を実行することを防止するトリガーリスナー(キュー的にFIFOで実行される)
  * @author hassoubeat
  */
 public class MultiFireControlTriggerLisner implements TriggerListener{
@@ -24,6 +24,8 @@ public class MultiFireControlTriggerLisner implements TriggerListener{
     
     // トリガーの実行順序を制御するキューリスト
     static private List<String> queueList = new ArrayList();
+    
+    private final int DEFAULT_PRIORITY = 10;
     
 
     public MultiFireControlTriggerLisner() {
@@ -37,6 +39,17 @@ public class MultiFireControlTriggerLisner implements TriggerListener{
     @Override
     public void triggerFired(Trigger trgr, JobExecutionContext jec) {
         logger.debug(trgr.toString() + "triggerFired");
+        
+        // priority 逆計算 5を基準に優先度で減算させて指定秒数待機する
+        // priority 起動順番の制御が目的
+        int wait = DEFAULT_PRIORITY - trgr.getPriority();
+        if (wait > 0) {
+            try {
+                sleep(wait * 100);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        }
         
         // トリガー情報をリストに格納し、最前列になるまで待機する
         queueList.add(trgr.toString());

@@ -68,7 +68,7 @@ public class TriggerFactory {
             //　アカウントに紐づくイベント
             triggerGroupName = ACCOUNT_GROUP;
         }
-        if (restEvent.getFacetId() != null) {
+        if (restEvent.getToyFacetId() != null) {
             //　ファセットに紐づくイベント
             triggerGroupName = FACET_GROUP;
         }
@@ -94,7 +94,7 @@ public class TriggerFactory {
                 logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName, triggerGroupName, "日時ループ");
             } else {
                 // ループの終わりが設定されていた場合
-                triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInDays(roopInterval).withMisfireHandlingInstructionDoNothing()).build());
+                triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withMisfireHandlingInstructionDoNothing().withIntervalInDays(roopInterval)).build());
                 logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName, triggerGroupName, "日時ループ");
             }
         }
@@ -197,7 +197,7 @@ public class TriggerFactory {
                     logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.SATURDAY, triggerGroupName, "週ループ");
                 }
             }
-            
+                  
             return triggers;
         }
         

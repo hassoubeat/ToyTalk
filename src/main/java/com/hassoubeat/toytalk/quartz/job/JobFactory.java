@@ -5,7 +5,12 @@
  */
 package com.hassoubeat.toytalk.quartz.job;
 
+import com.hassoubeat.toytalk.constract.MessageConst;
 import com.hassoubeat.toytalk.entity.RestEvent;
+import com.hassoubeat.toytalk.util.FacetProgramUtil;
+import com.hassoubeat.toytalk.util.FacetVersionPropertyUtil;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import static org.quartz.JobBuilder.newJob;
 import org.quartz.JobDetail;
 import org.slf4j.Logger;
@@ -18,6 +23,9 @@ import org.slf4j.LoggerFactory;
 public class JobFactory {
     // ロガー
     private static Logger logger = LoggerFactory.getLogger(JobFactory.class);
+    
+    private static FacetVersionPropertyUtil fvpUtil = FacetVersionPropertyUtil.getInstance();
+    private static FacetProgramUtil facetProgramUtil = FacetProgramUtil.getInstance();
     
     private static final String JOB = "job";
     
@@ -39,28 +47,50 @@ public class JobFactory {
         // ジョブ名の生成
         String jobName = JOB + Integer.toString(restEvent.getId());
         
-        logger.info(restEvent.toString());
-        
         // ジョブが属するグループ名の取得
         String jobGroupName = "";
         if (restEvent.getToyId() != null) {
             // Toyグループに紐づくイベント
             jobGroupName = TOY_GROUP;
+            job = newJob(JsayJob.class).withIdentity(jobName, jobGroupName).build();
+            job.getJobDataMap().put("eventName", restEvent.getName());
+            job.getJobDataMap().put("eventContent", restEvent.getContent());
         }
         if (restEvent.getAccountId() != null) {
             // アカウントに紐づくイベント
             jobGroupName = ACCOUNT_GROUP;
+            job = newJob(JsayJob.class).withIdentity(jobName, jobGroupName).build();
+            job.getJobDataMap().put("eventName", restEvent.getName());
+            job.getJobDataMap().put("eventContent", restEvent.getContent());
         }
-        if (restEvent.getFacetId() != null) {
+        if (restEvent.getToyFacetId() != null) {
             // ファセットに紐づくイベント
             jobGroupName = FACET_GROUP;
+            if (StringUtils.isEmpty(restEvent.getFacetProgramPath())) {
+                // ファセットプログラムが指定されていなかった場合
+                job = newJob(JsayJob.class).withIdentity(jobName, jobGroupName).build();
+                job.getJobDataMap().put("eventName", restEvent.getName());
+                job.getJobDataMap().put("eventContent", restEvent.getContent());
+                
+            } else {
+                // ファセットプログラムが指定されていた場合
+                String facetVersionKey = FilenameUtils.getBaseName(restEvent.getFacetProgramPath());
+                Double facetVersion = restEvent.getFacetVersion();
+                if (fvpUtil.compareToFacetVersion(facetVersionKey, facetVersion) > 0) {
+                    // ToyTalkで保存しているToyバージョンよりも新しい場合 or 新たに追加するファセットプログラムだった場合
+                    
+                    // Pathからファイルをダウンロードする
+                    facetProgramUtil.download(restEvent.getFacetProgramPath());
+                    // 新たにプロパティファイルにバージョンを上書きする
+                    fvpUtil.saveFacetVersion(facetVersionKey, facetVersion);
+                }
+                job = newJob(OriginalJob.class).withIdentity(jobName, jobGroupName).build();
+                job.getJobDataMap().put("fileName", FilenameUtils.getName(restEvent.getFacetProgramPath()));
+                job.getJobDataMap().put("className", facetVersionKey);
+            }
         }
         
-        // TODO いずれジョブが増えた場合に、動的にジョブを生成して渡す
-        job = newJob(JsayJob.class).withIdentity(jobName, jobGroupName).build();
-        job.getJobDataMap().put("eventName", restEvent.getName());
-        job.getJobDataMap().put("eventContent", restEvent.getContent());
-        
+        logger.info("{}.{} JOB_NAME:{} JOB_GROUP:{}" , MessageConst.SUCCESS_CREATE_JOB.getId(), MessageConst.SUCCESS_CREATE_JOB.getMessage(), jobName, jobGroupName);
         return job;
     }
     

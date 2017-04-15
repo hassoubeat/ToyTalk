@@ -55,14 +55,22 @@ public class RestEvent {
     
     @Getter
     @Setter
-    private Integer FacetId;
+    private Integer ToyFacetId;
+    
+    @Getter
+    @Setter
+    private Double facetVersion;
+    
+    @Getter
+    @Setter
+    private String facetProgramPath;
 
     public RestEvent() {
     }
 
     @Override
     public String toString() {
-        return "RestEvent{" + "id=" + id + ", name=" + name + ", content=" + content + ", startDate=" + startDate + ", endDate=" + endDate + ", roop=" + roop + ", roopEndDate=" + roopEndDate + ", toyId=" + toyId + ", accountId=" + accountId + ", FacetId=" + FacetId + '}';
+        return "RestEvent{" + "id=" + id + ", name=" + name + ", content=" + content + ", startDate=" + startDate + ", endDate=" + endDate + ", roop=" + roop + ", roopEndDate=" + roopEndDate + ", toyId=" + toyId + ", accountId=" + accountId + ", toyFacetId=" + ToyFacetId + ", facetVersion=" + facetVersion + ". facetProgramPath=" + facetProgramPath + '}';
     }
     
     

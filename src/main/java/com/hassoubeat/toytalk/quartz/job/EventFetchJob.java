@@ -41,7 +41,7 @@ public class EventFetchJob implements Job{
         try {
             // TODO 一秒ストップすることで、フェッチの再取得が発生しないようにする
             // どうやらCronの仕様で、1秒以内に再度同じイベントが登録されてしまうともう一度走ってしまうため
-            sleep(1000);
+            sleep(60000);
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }

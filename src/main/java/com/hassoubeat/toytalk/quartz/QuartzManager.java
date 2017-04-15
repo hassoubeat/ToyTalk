@@ -64,6 +64,8 @@ public class QuartzManager {
      */
     public void addEvent(RestEvent restEvent) {
         
+        System.out.println(restEvent.toString());
+        
         // JobとTriggerを取得する
         JobDetail job = JobFactory.getJob(restEvent);
         List<Trigger> triggers = TriggerFactory.getTrigger(restEvent, job);
