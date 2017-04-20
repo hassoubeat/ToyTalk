@@ -8,7 +8,6 @@ package com.hassoubeat.toytalk.util;
 
 import com.hassoubeat.toytalk.constract.MessageConst;
 import com.hassoubeat.toytalk.exception.ToyTalkException;
-import java.nio.file.NoSuchFileException;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;

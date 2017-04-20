@@ -13,7 +13,6 @@ import com.hassoubeat.toytalk.gpio.Viewer;
 import com.hassoubeat.toytalk.gpio.ViewerFactory;
 import com.hassoubeat.toytalk.quartz.QuartzManager;
 import com.hassoubeat.toytalk.util.UtilLogic;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -51,13 +50,14 @@ public class RestClient {
     final private String HEADER_NAME_MAC_ADDRESS = "macAddress";
     final private String HEADER_NAME_TOY_TALK_VERSION = "toyTalkVersion";
     
-    final private String resourcePath;
-    final private String eventResoucePath = "events/0.1/events";
+    final private String REST_RESOUCE_PATH;
+    final private String FETCH_ALL_EVENT_RESOUCE_PATH = "events/0.1/events";
+//    final private String FETCH_EVENT_COMPLETE_NOTICE_RESOUCE_PATH = "events/0.1/events/notice";
 
     private RestClient() {
         // プロパティファイルからREST_APIのリソースパスの取得
         ResourceBundle properties = ResourceBundle.getBundle("PathConfig");
-        this.resourcePath = properties.getString("rest.resource.path");
+        this.REST_RESOUCE_PATH = properties.getString("rest.resource.path");
     }
     
     /**
@@ -76,7 +76,7 @@ public class RestClient {
         
         List<RestEvent> eventList = null;
         try {
-            WebTarget webTarget = restClient.target(resourcePath).path(eventResoucePath);
+            WebTarget webTarget = restClient.target(REST_RESOUCE_PATH).path(FETCH_ALL_EVENT_RESOUCE_PATH);
             
             // プロパティファイルから取得期間と加算する
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -122,38 +122,82 @@ public class RestClient {
     }
     
     /**
+     * イベント取得が完了した事をToyManagerに通知するメソッド(同期時間の更新)
+     */
+//    private void fetchEventCompleteNotice() {
+//        String rotNum = utilLogic.getRotNumber();
+//        String accessToken = utilLogic.getAccessToken();
+//        String macAddress = utilLogic.getMacAddress();
+//        String toyTalkVersion = utilLogic.getToyTalkVersion();
+//
+//        Client restClient = ClientBuilder.newClient();
+//        // サーバ接続中LEDをONにする
+//        gpio.connectLedOn();
+//        
+//        try {
+//            WebTarget webTarget = restClient.target(REST_RESOUCE_PATH).path(FETCH_EVENT_COMPLETE_NOTICE_RESOUCE_PATH);
+//            webTarget
+//                    .request(MediaType.APPLICATION_XML_TYPE)
+//                    .header(HEADER_NAME_ROT_NUMBER, rotNum)
+//                    .header(HEADER_NAME_AUTHORICATION, accessToken)
+//                    .header(HEADER_NAME_MAC_ADDRESS, macAddress)
+//                    .header(HEADER_NAME_TOY_TALK_VERSION, toyTalkVersion)
+//                    .get();
+//            
+//        } catch (NotAuthorizedException ex) {
+//            // TODO 認証失敗と期限切れを出し分ける
+//            System.out.println("ExceptionMessage" + ex.getMessage());
+//
+//        } catch (ForbiddenException ex) {
+//            // アクセスフィルターが未認証の場合
+//            logger.warn("{}:{} ROT_NUMBER:{}, ACCESS_TOKEN:{}, MAC_ADDRESS:{}", MessageConst.ACCESS_FILTER_UN_APPROVAL.getId(), MessageConst.ACCESS_FILTER_UN_APPROVAL.getMessage(), rotNum, accessToken, macAddress, ex);
+//            viewer.displayAccessFilterUnApprovalView();
+//        } catch (BadRequestException ex) {
+//            // リクエストパラメータの値に不備がある時
+//            logger.warn("{}:{} ROT_NUMBER:{}, ACCESS_TOKEN:{}, MAC_ADDRESS:{}", MessageConst.REQUEST_PARAM_INVALID.getId(), MessageConst.REQUEST_PARAM_INVALID.getMessage(), rotNum, accessToken, macAddress, ex);
+//            viewer.displayRequestParamInvalidView();
+//        } finally {
+//            // サーバ接続中LEDをOFFにする
+//            gpio.connectLedOff();
+//            // RESTクライアントを閉じる
+//            restClient.close();
+//        }
+//    }
+    
+    /**
      * Restで受領した際のDate型の時差を現在のシステムタイムゾーンに修正する
      * (クライアント側で受領するときに、勝手にこっちのシステムタイムゾーンに合わせて時間を変更してくるため、元通りにする)
      * @param restEvent 
      */
-    public RestEvent retouchTimezone(RestEvent restEvent) {
-        Date startDate = restEvent.getStartDate();
-        Date endDate = restEvent.getEndDate();
-        Date roopEndDate = restEvent.getRoopEndDate();
-        if (startDate != null) {
-            try {
-                restEvent.setStartDate(utilLogic.retouchTimezone(startDate));
-            } catch (ParseException ex) {
-                ex.printStackTrace();
-            }
-        }
-        if (endDate != null) {
-            try {
-                restEvent.setEndDate(utilLogic.retouchTimezone(endDate));
-            } catch (ParseException ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        if (roopEndDate != null) {
-            try {
-                restEvent.setRoopEndDate(utilLogic.retouchTimezone(roopEndDate));
-            } catch (ParseException ex) {
-                ex.printStackTrace();
-            }
-        }
-        return restEvent;
-    }
+//    public RestEvent retouchTimezone(RestEvent restEvent) {
+//        Date startDate = restEvent.getStartDate();
+//        Date endDate = restEvent.getEndDate();
+//        Date roopEndDate = restEvent.getRoopEndDate();
+//        if (startDate != null) {
+//            try {
+//                restEvent.setStartDate(utilLogic.retouchTimezone(startDate));
+//            } catch (ParseException ex) {
+//                ex.printStackTrace();
+//            }
+//        }
+//        if (endDate != null) {
+//            try {
+//                restEvent.setEndDate(utilLogic.retouchTimezone(endDate));
+//            } catch (ParseException ex) {
+//                ex.printStackTrace();
+//            }
+//        }
+//
+//        if (roopEndDate != null) {
+//            try {
+//                restEvent.setRoopEndDate(utilLogic.retouchTimezone(roopEndDate));
+//            } catch (ParseException ex) {
+//                ex.printStackTrace();
+//            }
+//        }
+//        return restEvent;
+//    }
+    
     /**
      * RestClientのインスタンス(シングルトン)を返却するメソッド
      * @return RestClientのシングルトンインスタンス

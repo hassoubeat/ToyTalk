@@ -38,7 +38,7 @@ public class JsayJob implements Job{
             process.waitFor();
             
             // ロガーに実行したコマンドを出力
-            logger.info("{}:{} COMMAND:{}", MessageConst.SUCCESS_RUN_COMMAND.getId(), MessageConst.SUCCESS_RUN_COMMAND.getMessage(), jsayCommand);
+            logger.info("{}:{} COMMAND:{}", MessageConst.SUCCESS_RUN_JOB.getId(), MessageConst.SUCCESS_RUN_JOB.getMessage(), jsayCommand);
         } catch (IOException | InterruptedException ex) {
             // 実行失敗時の挙動定義
             logger.error("{}:{} COMMAND:{}", MessageConst.FAILED_RUN_COMMAND.getId(), MessageConst.FAILED_RUN_COMMAND.getMessage(), jsayCommand);

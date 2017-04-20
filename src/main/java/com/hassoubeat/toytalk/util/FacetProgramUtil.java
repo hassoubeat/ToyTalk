@@ -8,12 +8,14 @@ package com.hassoubeat.toytalk.util;
 
 import com.hassoubeat.toytalk.constract.MessageConst;
 import com.hassoubeat.toytalk.exception.ToyTalkException;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ResourceBundle;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -29,8 +31,8 @@ public class FacetProgramUtil {
     
     private static final Logger logger = LoggerFactory.getLogger(FacetProgramUtil.class.getName());
     
-    // TODO 外部プロパティから読込
-    private final String PROGRAM_PLACE_PATH = "/home/pi/share/toytalk/facet/lib/";
+    // 外部プロパティから読込
+    private final String PROGRAM_PLACE_PATH = ResourceBundle.getBundle("PathConfig").getString("facet.lib.path");
     
     /**
      * 引数で受け取ったパスからファセットプログラムをダウンロードする
@@ -48,6 +50,8 @@ public class FacetProgramUtil {
             IOUtils.copy(in, out);
             IOUtils.closeQuietly(in);
             IOUtils.closeQuietly(out);
+//            File file = new File(fileDownloadPath);
+//            file.setWritable(true, false);
         } catch (MalformedURLException ex) {
             throw new ToyTalkException("", ex);
         } catch (IOException ex) {

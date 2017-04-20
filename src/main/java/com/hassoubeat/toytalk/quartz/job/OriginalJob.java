@@ -7,11 +7,19 @@ package com.hassoubeat.toytalk.quartz.job;
 
 import com.hassoubeat.FacetInterface;
 import com.hassoubeat.Result;
+import com.hassoubeat.toytalk.constract.MessageConst;
 import com.hassoubeat.toytalk.exception.ToyTalkException;
+import com.hassoubeat.toytalk.gpio.GpioManager;
+import com.hassoubeat.toytalk.gpio.Viewer;
+import com.hassoubeat.toytalk.gpio.ViewerFactory;
+import com.hassoubeat.toytalk.quartz.QuartzManager;
+import com.hassoubeat.toytalk.rest.RestClient;
+import com.hassoubeat.toytalk.util.UtilLogic;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ResourceBundle;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -27,10 +35,15 @@ public class OriginalJob implements Job{
     
     // ロガー
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
+    private final GpioManager gpio = GpioManager.getInstance();
+    private final Viewer viewer = ViewerFactory.getInstance();
+    private final UtilLogic utilLogic = UtilLogic.getInstance();
+    private final RestClient restClient = RestClient.getInstance();
+    private final QuartzManager quartzManager = QuartzManager.getInstance();
     
-    // TODO 外部プロパティに切り出し
-    private final String PROGRAM_PLACE_PATH = "/home/pi/share/toytalk/facet/lib/";
-    private final String PACAKAGE = "com.hassoubeat.";
+    // 外部プロパティに切り出し
+    private final String PROGRAM_PLACE_PATH = ResourceBundle.getBundle("PathConfig").getString("facet.lib.path");
+    private final String PACAKAGE = ResourceBundle.getBundle("PathConfig").getString("facet.package");
     
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -57,7 +70,8 @@ public class OriginalJob implements Job{
         } catch (Exception ex) {
             throw new ToyTalkException("", ex);
         }
-        // TODO ログ出力
+        // ログ出力
+        logger.info("{}.{} RUN_PROGRAM_FILE_PATH:{} RUN_CLASS:{}" , MessageConst.SUCCESS_RUN_ORIGINAL_JOB.getId(), MessageConst.SUCCESS_RUN_ORIGINAL_JOB.getMessage(), programFilePath, className);
         
     }
 }

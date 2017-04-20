@@ -9,12 +9,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <!-- ログ出力用の変数 -->
-        <log.output.level>trace</log.output.level>
-        <log.file.output.pattern>[%level]: %logger :"%message" :%date{ISO8601} %n</log.file.output.pattern>
-        <log.file.output.path>/home/pi/share/toytalk/log/</log.file.output.path>
-        <log.file.output.name>toytalk.log</log.file.output.name>
-        <log.console.output.pattern>[%level]: %logger :"%message" :%date{ISO8601} %n</log.console.output.pattern>
+        <facet.package>com.hassoubeat.</facet.package>
     </properties>
     <dependencies>
         <dependency>
@@ -92,44 +87,30 @@
             <artifactId>commons-beanutils</artifactId>
             <version>1.9.3</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/commons-logging/commons-logging -->
-<!--        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.2</version>
-        </dependency>-->
         <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.5</version>
         </dependency>  
-
-
-<!--        <dependency>
-            <groupId>org.glassfish.jersey.media</groupId>
-            <artifactId>jersey-media-json-processing</artifactId>
-            <version>2.6</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.media</groupId>
-            <artifactId>jersey-media-moxy</artifactId>
-            <version>2.6</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.media</groupId>
-            <artifactId>jersey-media-json-jackson</artifactId>
-            <version>2.13</version>
-        </dependency>-->
     </dependencies>
     <!-- 環境毎の設定ファイル定義 -->
     <profiles>
         <!-- ローカル用設定(デフォルトはこれ) -->
         <profile>
-            <id>local</id>
+            <id>staging</id>
             <properties>
-                <!-- RestAPIのリソースパス -->
-                <rest.resource.path>http://localhost:8080/ToyManager/webapi/</rest.resource.path>
+                <rest.resource.path>http://52.196.234.137:8080/ToyManager/webapi/</rest.resource.path>
+                <!-- ログ出力用の変数 -->
+                <log.output.level>trace</log.output.level>
+                <log.file.output.pattern>[%level]: %logger :"%message" :%date{ISO8601} %n</log.file.output.pattern>
+                <log.file.output.path>/home/pi/share/toytalk/log/</log.file.output.path>
+                <log.file.output.name>toytalk.log</log.file.output.name>
+                <log.console.output.pattern>[%level]: %logger :"%message" :%date{ISO8601} %n</log.console.output.pattern>
+                <!-- ファイルパスの変数 -->
+                <root.path>/home/pi/share/toytalk/</root.path>
+                <facet.lib.path>${root.path}facet/lib/</facet.lib.path>
+                <facet.properties.path>${root.path}facet/properties/</facet.properties.path>
             </properties>
             <build>
                 <resources>
@@ -142,10 +123,20 @@
         </profile>
         <profile>
             <!-- 本番用設定 -->
-            <id>aws</id>
+            <id>production</id>
             <properties>
                 <!-- RestAPIのリソースパス -->
                 <rest.resource.path>http://52.196.234.137:8080/ToyManager/webapi/</rest.resource.path>
+                <!-- ログ出力用の変数 -->
+                <log.output.level>trace</log.output.level>
+                <log.file.output.pattern>[%level]: %logger :"%message" :%date{ISO8601} %n</log.file.output.pattern>
+                <log.file.output.path>/usr/bin/toytalk/toytalk/log/</log.file.output.path>
+                <log.file.output.name>toytalk.log</log.file.output.name>
+                <log.console.output.pattern>[%level]: %logger :"%message" :%date{ISO8601} %n</log.console.output.pattern>
+                <!-- ファイルパスの変数 -->
+                <root.path>/usr/bin/toytalk/</root.path>
+                <facet.lib.path>${root.path}facet/lib/</facet.lib.path>
+                <facet.properties.path>${root.path}facet/properties/</facet.properties.path>
             </properties>
             <build>
                 <resources>
@@ -180,27 +171,11 @@
                   <mainClass>com.hassoubeat.toytalk.daemon.ToyTalkDaemon</mainClass>
                 </manifest>
                 <manifestEntries>
-                    <Class-Path>./settings/</Class-Path>
+                    <Class-Path>./properties/</Class-Path>
                 </manifestEntries>
               </archive>
             </configuration>
           </plugin>
-<!--          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-            <version>2.4</version>
-            <configuration>
-              <archive>
-                <manifest>
-                  <mainClass>com.hassoubeat.toytalk.daemon.ToyTalkDaemon</mainClass>
-                  <addClasspath>true</addClasspath>
-                </manifest>
-                <manifestEntries>
-                  <Class-Path>./</Class-Path>
-                </manifestEntries>
-              </archive>
-            </configuration>
-          </plugin>-->
         </plugins>
         <resources>
             <resource>

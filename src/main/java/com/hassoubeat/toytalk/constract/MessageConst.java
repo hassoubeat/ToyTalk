@@ -15,8 +15,10 @@ public enum MessageConst {
     SUCCESS_CLEAR_EVENT("TIR_01000002", "スケジューラに登録されたイベントを全削除しました。"),
     SUCCESS_CREATE_JOB("TIR_01000003", "Quartzジョブを生成しました。"),
     SUCCESS_CREATE_TRIGGER("TIR_01000004", "Quartzトリガーを生成しました。"),
-    SUCCESS_RUN_COMMAND("TIR_01000005", "ジョブを実行しました。"),
-    SUCCESS_FACET_PROGRAM_DOWNLOAD("TIR_01000006", "ファセットプログラムのダウンロードが完了しました。"),
+    SUCCESS_RUN_JOB("TIR_01000005", "ジョブを実行しました。"),
+    SUCCESS_RUN_ORIGINAL_JOB("TIR_01000006", "オリジナルジョブを実行しました。"),
+    SUCCESS_FACET_PROGRAM_DOWNLOAD("TIR_01000007", "ファセットプログラムのダウンロードが完了しました。"),
+    
     
     // TER(ToyTalkで発生する想定内エラーメッセージ)
     UN_CONNECTED_NETWORK("TER_01000001", "インターネットに未接続です。"),
