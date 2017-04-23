@@ -111,6 +111,7 @@
                 <root.path>/home/pi/share/toytalk/</root.path>
                 <facet.lib.path>${root.path}facet/lib/</facet.lib.path>
                 <facet.properties.path>${root.path}facet/properties/</facet.properties.path>
+                <facet.properties.edit.view.path>${facet.properties.path}editview/</facet.properties.edit.view.path>
             </properties>
             <build>
                 <resources>
@@ -137,6 +138,34 @@
                 <root.path>/usr/bin/toytalk/</root.path>
                 <facet.lib.path>${root.path}facet/lib/</facet.lib.path>
                 <facet.properties.path>${root.path}facet/properties/</facet.properties.path>
+                <facet.properties.edit.view.path>/var/www/ToyTalkConsole/facet/editview/</facet.properties.edit.view.path>
+            </properties>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+        <profile>
+            <!-- 本番(リソースはローカル)用設定 -->
+            <id>production_resouces_local</id>
+            <properties>
+                <!-- RestAPIのリソースパス -->
+                <rest.resource.path>http://192.168.0.4:8080/ToyManager/webapi/</rest.resource.path>
+                <!-- ログ出力用の変数 -->
+                <log.output.level>trace</log.output.level>
+                <log.file.output.pattern>[%level]: %logger :"%message" :%date{ISO8601} %n</log.file.output.pattern>
+                <log.file.output.path>/usr/bin/toytalk/toytalk/log/</log.file.output.path>
+                <log.file.output.name>toytalk.log</log.file.output.name>
+                <log.console.output.pattern>[%level]: %logger :"%message" :%date{ISO8601} %n</log.console.output.pattern>
+                <!-- ファイルパスの変数 -->
+                <root.path>/usr/bin/toytalk/</root.path>
+                <facet.lib.path>${root.path}facet/lib/</facet.lib.path>
+                <facet.properties.path>${root.path}facet/properties/</facet.properties.path>
+                <facet.properties.edit.view.path>/var/www/ToyTalkConsole/facet/editview/</facet.properties.edit.view.path>
             </properties>
             <build>
                 <resources>

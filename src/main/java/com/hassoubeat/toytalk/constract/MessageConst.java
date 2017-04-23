@@ -17,7 +17,7 @@ public enum MessageConst {
     SUCCESS_CREATE_TRIGGER("TIR_01000004", "Quartzトリガーを生成しました。"),
     SUCCESS_RUN_JOB("TIR_01000005", "ジョブを実行しました。"),
     SUCCESS_RUN_ORIGINAL_JOB("TIR_01000006", "オリジナルジョブを実行しました。"),
-    SUCCESS_FACET_PROGRAM_DOWNLOAD("TIR_01000007", "ファセットプログラムのダウンロードが完了しました。"),
+    SUCCESS_FILE_DOWNLOAD("TIR_01000007", "ファイルのダウンロードが完了しました。"),
     
     
     // TER(ToyTalkで発生する想定内エラーメッセージ)

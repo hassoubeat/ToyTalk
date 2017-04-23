@@ -47,6 +47,10 @@ public class RestEvent {
     
     @Getter
     @Setter
+    private int priority;
+    
+    @Getter
+    @Setter
     private Integer toyId;
     
     @Getter
@@ -64,13 +68,21 @@ public class RestEvent {
     @Getter
     @Setter
     private String facetProgramPath;
+    
+    @Getter
+    @Setter
+    private String facetPropertiesPath;
+    
+    @Getter
+    @Setter
+    private String facetPropertiesEditViewPath;
 
     public RestEvent() {
     }
 
     @Override
     public String toString() {
-        return "RestEvent{" + "id=" + id + ", name=" + name + ", content=" + content + ", startDate=" + startDate + ", endDate=" + endDate + ", roop=" + roop + ", roopEndDate=" + roopEndDate + ", toyId=" + toyId + ", accountId=" + accountId + ", toyFacetId=" + ToyFacetId + ", facetVersion=" + facetVersion + ". facetProgramPath=" + facetProgramPath + '}';
+        return "RestEvent{" + "id=" + id + ", name=" + name + ", content=" + content + ", startDate=" + startDate + ", endDate=" + endDate + ", roop=" + roop + ", roopEndDate=" + roopEndDate + ", priority=" + priority + ", toyId=" + toyId + ", accountId=" + accountId + ", toyFacetId=" + ToyFacetId + ", facetVersion=" + facetVersion + ", facetProgramPath=" + facetProgramPath + ", facetPropertiesPath=" + facetPropertiesPath + ", facetPropertiesEditViewPath=" + facetPropertiesEditViewPath + '}';
     }
     
     

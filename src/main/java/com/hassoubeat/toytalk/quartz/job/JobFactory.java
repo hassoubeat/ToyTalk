@@ -6,9 +6,11 @@
 package com.hassoubeat.toytalk.quartz.job;
 
 import com.hassoubeat.toytalk.constract.MessageConst;
+import com.hassoubeat.toytalk.constract.PropertyConst;
 import com.hassoubeat.toytalk.entity.RestEvent;
-import com.hassoubeat.toytalk.util.FacetProgramUtil;
+import com.hassoubeat.toytalk.util.FileUtil;
 import com.hassoubeat.toytalk.util.FacetVersionPropertyUtil;
+import java.util.Properties;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import static org.quartz.JobBuilder.newJob;
@@ -25,7 +27,7 @@ public class JobFactory {
     private static Logger logger = LoggerFactory.getLogger(JobFactory.class);
     
     private static FacetVersionPropertyUtil fvpUtil = FacetVersionPropertyUtil.getInstance();
-    private static FacetProgramUtil facetProgramUtil = FacetProgramUtil.getInstance();
+    private static FileUtil fileUtil = FileUtil.getInstance();
     
     private static final String JOB = "job";
     
@@ -77,13 +79,26 @@ public class JobFactory {
                 String facetVersionKey = FilenameUtils.getBaseName(restEvent.getFacetProgramPath());
                 Double facetVersion = restEvent.getFacetVersion();
                 if (fvpUtil.compareToFacetVersion(facetVersionKey, facetVersion) > 0) {
-                    // ToyTalkで保存しているToyバージョンよりも新しい場合 or 新たに追加するファセットプログラムだった場合
+                    // ToyTalkで保存しているToyバージョンよりも新しい場合
                     
-                    // Pathからファイルをダウンロードする
-                    facetProgramUtil.download(restEvent.getFacetProgramPath());
+                    // ファセットプログラムをダウンロードする
+                    fileUtil.download(restEvent.getFacetProgramPath(), PropertyConst.FACET_LIB_PATH);
+                    // ファセットプログラム編集画面をダウンロードする
+                    String downloadEditViewPath = fileUtil.download(restEvent.getFacetPropertiesEditViewPath(), PropertyConst.FACET_PROPERTIES_EDIT_VIEW_PATH);
+                    fileUtil.chmodAnyReadable(downloadEditViewPath);
+                    
+                    if (fvpUtil.compareToFacetVersion(facetVersionKey, facetVersion) == 2) {
+                        // 新たに追加するファセットプログラムだった場合
+
+                        // ファセットプロパティファイルを取得する
+                        String downloadFilePath = fileUtil.download(restEvent.getFacetPropertiesPath(), PropertyConst.FACET_PROPERTIES_PATH);
+                        fileUtil.chmodAnyReadable(downloadFilePath);
+                        fileUtil.chmodAnyWritable(downloadFilePath);
+                    }
                     // 新たにプロパティファイルにバージョンを上書きする
                     fvpUtil.saveFacetVersion(facetVersionKey, facetVersion);
                 }
+                
                 job = newJob(OriginalJob.class).withIdentity(jobName, jobGroupName).build();
                 job.getJobDataMap().put("fileName", FilenameUtils.getName(restEvent.getFacetProgramPath()));
                 job.getJobDataMap().put("className", facetVersionKey);

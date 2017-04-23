@@ -21,20 +21,20 @@ public class FacetVersionPropertyUtil {
     private static final Logger logger = LoggerFactory.getLogger(FacetVersionPropertyUtil.class.getName());
     
     private final PropertyUtil propertyUtil = PropertyUtil.getInstace();
-    
+    // TODO 外部プロパティに
     private final String PROPERTY_FILE_NAME = "facetVersion.properties";
     
     /**
      * 引数で渡したファセットバージョンとプロパティファイルに保持しているファセットバージョンを比較する
      * @param propertyKey
      * @param targetFacetVersion
-     * @return 比較結果 引数のファセットバージョンがパラメータが存在しなかった or 大の場合 1, =の場合 0, 小の場合-1
+     * @return 比較結果 大の場合 1, =の場合 0, 小の場合-1 ,引数のファセットバージョンがパラメータが存在しなかった 2
      */
     public int compareToFacetVersion(String propertyKey, Double targetFacetVersion){
         String saveFacetVersionStr = propertyUtil.load(PROPERTY_FILE_NAME, propertyKey);
         if (StringUtils.isEmpty(saveFacetVersionStr)) {
             // keyに対応するパラメータが存在しなかった場合
-            return 1;
+            return 2;
         }
         Double saveFacetVersion = Double.parseDouble(saveFacetVersionStr);
         

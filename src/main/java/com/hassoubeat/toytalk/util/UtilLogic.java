@@ -6,6 +6,7 @@
 package com.hassoubeat.toytalk.util;
 
 import com.hassoubeat.toytalk.constract.MessageConst;
+import com.hassoubeat.toytalk.constract.PropertyConst;
 import com.hassoubeat.toytalk.exception.ToyTalkException;
 import java.io.IOException;
 import java.net.NetworkInterface;
@@ -17,7 +18,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.ResourceBundle;
 import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,18 +32,12 @@ public class UtilLogic {
     
     private static final UtilLogic utilLogic = new UtilLogic();
     
-    private final String ROT_NUMBER;
-    private final String ACCESS_TOKEN;
-    private final String TOY_TALK_VERSION;
-    private final int EVENT_FETCH_TERM;
+    private final String ROT_NUMBER = PropertyConst.ROT_NUMBER;
+    private final String ACCESS_TOKEN = PropertyConst.ACCESS_TOKEN;
+    private final String TOY_TALK_VERSION = PropertyConst.TOY_TALK_VERSION;
+    private final int EVENT_FETCH_TERM = Integer.parseInt(PropertyConst.EVENT_FETCH_TERM);
     
     private UtilLogic() {
-        // プロパティファイルから各種パラメータの取得
-        ResourceBundle properties = ResourceBundle.getBundle("toytalk");
-        ROT_NUMBER = properties.getString("RotNumber");
-        ACCESS_TOKEN = properties.getString("AccessToken");
-        TOY_TALK_VERSION = properties.getString("ToyTalkVersion");
-        EVENT_FETCH_TERM = Integer.parseInt(properties.getString("EventFetchTerm"));
     }
     
     /**

@@ -8,6 +8,7 @@ package com.hassoubeat.toytalk.quartz.job;
 import com.hassoubeat.FacetInterface;
 import com.hassoubeat.Result;
 import com.hassoubeat.toytalk.constract.MessageConst;
+import com.hassoubeat.toytalk.constract.PropertyConst;
 import com.hassoubeat.toytalk.exception.ToyTalkException;
 import com.hassoubeat.toytalk.gpio.GpioManager;
 import com.hassoubeat.toytalk.gpio.Viewer;
@@ -19,7 +20,6 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ResourceBundle;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -41,9 +41,9 @@ public class OriginalJob implements Job{
     private final RestClient restClient = RestClient.getInstance();
     private final QuartzManager quartzManager = QuartzManager.getInstance();
     
-    // 外部プロパティに切り出し
-    private final String PROGRAM_PLACE_PATH = ResourceBundle.getBundle("PathConfig").getString("facet.lib.path");
-    private final String PACAKAGE = ResourceBundle.getBundle("PathConfig").getString("facet.package");
+    private final String PACAKAGE = PropertyConst.FACET_PACKAGE;
+    private final String FACET_PROGRAM_PATH = PropertyConst.FACET_LIB_PATH;
+    
     
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -51,7 +51,7 @@ public class OriginalJob implements Job{
         System.out.println("OriginalJobだよぉぉぉぉ！");
         
         JobDataMap jobDataMap = context.getJobDetail().getJobDataMap();
-        String programFilePath = PROGRAM_PLACE_PATH + jobDataMap.get("fileName");
+        String programFilePath = FACET_PROGRAM_PATH + jobDataMap.get("fileName");
         String className = PACAKAGE + jobDataMap.get("className");
         
         //jarファイルを引数に指定

@@ -54,6 +54,7 @@ public class TriggerFactory {
         List<Trigger> triggers = new ArrayList();
         
         int roop = restEvent.getRoop();
+        int priority = restEvent.getPriority();
         
         // トリガー名の生成
         String triggerName = TRIGGER + Integer.toString(restEvent.getId());
@@ -75,7 +76,7 @@ public class TriggerFactory {
         
         if (!bitLogic.bitCheck(roop, erpConst.IS_ROOP)) {
             // イベントの繰り返しが無効の場合
-            triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).build());
+            triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).withPriority(priority).build());
             logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName, triggerGroupName, "ループなし");
             return triggers;
         } 
@@ -90,11 +91,11 @@ public class TriggerFactory {
             
             if (restEvent.getRoopEndDate() == null) {
                 // ループの終わりが設定されていなかった場合
-                triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).withSchedule(calendarIntervalSchedule().withIntervalInDays(roopInterval).withMisfireHandlingInstructionDoNothing()).build());
+                triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).withSchedule(calendarIntervalSchedule().withIntervalInDays(roopInterval).withMisfireHandlingInstructionDoNothing()).withPriority(priority).build());
                 logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName, triggerGroupName, "日時ループ");
             } else {
                 // ループの終わりが設定されていた場合
-                triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withMisfireHandlingInstructionDoNothing().withIntervalInDays(roopInterval)).build());
+                triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withMisfireHandlingInstructionDoNothing().withIntervalInDays(roopInterval)).withPriority(priority).build());
                 logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName, triggerGroupName, "日時ループ");
             }
         }
@@ -111,11 +112,11 @@ public class TriggerFactory {
                 Date sundayDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.SUNDAY - eventStartDoW, Calendar.DAY_OF_MONTH);
                 if (restEvent.getRoopEndDate() == null) {
                     // 繰り返しの終わりが設定されていなかった場合
-                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.SUNDAY, triggerGroupName).startAt(sundayDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.SUNDAY, triggerGroupName).startAt(sundayDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).withPriority(priority).forJob(tyingJob).build());
                     logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.SUNDAY, triggerGroupName, "週ループ");
                 } else {
                     // 繰り返しの終わりが設定されていた場合
-                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.SUNDAY, triggerGroupName).startAt(sundayDate).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.SUNDAY, triggerGroupName).startAt(sundayDate).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).withPriority(priority).forJob(tyingJob).build());
                     logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.SUNDAY, triggerGroupName, "週ループ");
                 }
             }
@@ -124,11 +125,11 @@ public class TriggerFactory {
                 Date mondayDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.MONDAY - eventStartDoW, Calendar.DAY_OF_MONTH);
                 if (restEvent.getRoopEndDate() == null) {
                     // 繰り返しの終わりが設定されていなかった場合
-                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.MONDAY, triggerGroupName).startAt(mondayDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.MONDAY, triggerGroupName).startAt(mondayDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).withPriority(priority).forJob(tyingJob).build());
                     logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.MONDAY, triggerGroupName, "週ループ");
                 } else {
                     // 繰り返しの終わりが設定されていた場合
-                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.MONDAY, triggerGroupName).startAt(mondayDate).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.MONDAY, triggerGroupName).startAt(mondayDate).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).withPriority(priority).forJob(tyingJob).build());
                     logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.MONDAY, triggerGroupName, "週ループ");
                 }
             }
@@ -137,11 +138,11 @@ public class TriggerFactory {
                 Date tuesdayDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.TUESDAY - eventStartDoW, Calendar.DAY_OF_MONTH);
                 if (restEvent.getRoopEndDate() == null) {
                     // 繰り返しの終わりが設定されていなかった場合
-                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.TUESDAY, triggerGroupName).startAt(tuesdayDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.TUESDAY, triggerGroupName).startAt(tuesdayDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).withPriority(priority).forJob(tyingJob).build());
                     logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.TUESDAY, triggerGroupName, "週ループ");
                 } else {
                     // 繰り返しの終わりが設定されていた場合
-                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.TUESDAY, triggerGroupName).startAt(tuesdayDate).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.TUESDAY, triggerGroupName).startAt(tuesdayDate).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).withPriority(priority).forJob(tyingJob).build());
                     logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.TUESDAY, triggerGroupName, "週ループ");
                 }
             }
@@ -150,11 +151,11 @@ public class TriggerFactory {
                 Date webnesDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.WEDNESDAY - eventStartDoW, Calendar.DAY_OF_MONTH);
                 if (restEvent.getRoopEndDate() == null) {
                     // 繰り返しの終わりが設定されていなかった場合
-                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.WEDNESDAY, triggerGroupName).startAt(webnesDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.WEDNESDAY, triggerGroupName).startAt(webnesDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).withPriority(priority).forJob(tyingJob).build());
                     logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.WEDNESDAY, triggerGroupName, "週ループ");
                 } else {
                     // 繰り返しの終わりが設定されていた場合
-                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.WEDNESDAY, triggerGroupName).startAt(webnesDate).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.WEDNESDAY, triggerGroupName).startAt(webnesDate).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).withPriority(priority).forJob(tyingJob).build());
                     logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.WEDNESDAY, triggerGroupName, "週ループ");
                 }
             }
@@ -163,11 +164,11 @@ public class TriggerFactory {
                 Date thursDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.THURSDAY - eventStartDoW, Calendar.DAY_OF_MONTH);
                 if (restEvent.getRoopEndDate() == null) {
                     // 繰り返しの終わりが設定されていなかった場合
-                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.THURSDAY, triggerGroupName).startAt(thursDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.THURSDAY, triggerGroupName).startAt(thursDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).withPriority(priority).forJob(tyingJob).build());
                     logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.THURSDAY, triggerGroupName, "週ループ");
                 } else {
                     // 繰り返しの終わりが設定されていた場合
-                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.THURSDAY, triggerGroupName).startAt(thursDate).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.THURSDAY, triggerGroupName).startAt(thursDate).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).withPriority(priority).forJob(tyingJob).build());
                     logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.THURSDAY, triggerGroupName, "週ループ");
                 }
             }
@@ -176,11 +177,11 @@ public class TriggerFactory {
                 Date fridayDate = utilLogic.calDate(restEvent.getStartDate(), Calendar.FRIDAY - eventStartDoW, Calendar.DAY_OF_MONTH);
                 if (restEvent.getRoopEndDate() == null) {
                     // 繰り返しの終わりが設定されていなかった場合
-                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.FRIDAY, triggerGroupName).startAt(fridayDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.FRIDAY, triggerGroupName).startAt(fridayDate).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).withPriority(priority).forJob(tyingJob).build());
                     logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.FRIDAY, triggerGroupName, "週ループ");
                 } else {
                     // 繰り返しの終わりが設定されていた場合
-                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.FRIDAY, triggerGroupName).startAt(fridayDate).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.FRIDAY, triggerGroupName).startAt(fridayDate).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).withMisfireHandlingInstructionDoNothing()).withPriority(priority).forJob(tyingJob).build());
                     logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.FRIDAY, triggerGroupName, "週ループ");
                 }
             }
@@ -189,11 +190,11 @@ public class TriggerFactory {
                 Date saturday = utilLogic.calDate(restEvent.getStartDate(), Calendar.SATURDAY - eventStartDoW, Calendar.DAY_OF_MONTH);
                 if (restEvent.getRoopEndDate() == null) {
                     // 繰り返しの終わりが設定されていなかった場合
-                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.SATURDAY, triggerGroupName).startAt(saturday).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).inTimeZone(TimeZone.getTimeZone("Asia/Tokyo")).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.SATURDAY, triggerGroupName).startAt(saturday).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).inTimeZone(TimeZone.getTimeZone("Asia/Tokyo")).withMisfireHandlingInstructionDoNothing()).withPriority(priority).forJob(tyingJob).build());
                     logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.SATURDAY, triggerGroupName, "週ループ");
                 } else {
                     // 繰り返しの終わりが設定されていた場合
-                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.SATURDAY, triggerGroupName).startAt(saturday).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).inTimeZone(TimeZone.getTimeZone("Asia/Tokyo")).withMisfireHandlingInstructionDoNothing()).forJob(tyingJob).build());
+                    triggers.add(newTrigger().withIdentity(triggerName  + "-" + Calendar.SATURDAY, triggerGroupName).startAt(saturday).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInWeeks(roopInterval).inTimeZone(TimeZone.getTimeZone("Asia/Tokyo")).withMisfireHandlingInstructionDoNothing()).withPriority(priority).forJob(tyingJob).build());
                     logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName  + "-" + Calendar.SATURDAY, triggerGroupName, "週ループ");
                 }
             }
@@ -209,11 +210,11 @@ public class TriggerFactory {
                 
                 if (restEvent.getRoopEndDate() == null) {
                     // 繰り返しの終わりが設定されていなかった場合
-                    triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).withSchedule(calendarIntervalSchedule().withIntervalInMonths(roopInterval).withMisfireHandlingInstructionDoNothing()).build());
+                    triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).withSchedule(calendarIntervalSchedule().withIntervalInMonths(roopInterval).withMisfireHandlingInstructionDoNothing()).withPriority(priority).build());
                     logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName, triggerGroupName, "月ループ");
                 } else {
                     // 繰り返しの終わりが設定されていた場合
-                    triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInMonths(roopInterval).withMisfireHandlingInstructionDoNothing()).build());
+                    triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInMonths(roopInterval).withMisfireHandlingInstructionDoNothing()).withPriority(priority).build());
                     logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName, triggerGroupName, "月ループ");
                 }
                 
@@ -230,11 +231,11 @@ public class TriggerFactory {
             
             if (restEvent.getRoopEndDate() == null) {
                 // 繰り返しの終わりが設定されていなかった場合
-                triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).withSchedule(calendarIntervalSchedule().withIntervalInYears(roopInterval).withMisfireHandlingInstructionDoNothing()).build());
+                triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).withSchedule(calendarIntervalSchedule().withIntervalInYears(roopInterval).withMisfireHandlingInstructionDoNothing()).withPriority(priority).build());
                 logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName, triggerGroupName, "年ループ");
             } else {
                 // 繰り返しの終わりが設定されていた場合
-                triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInYears(roopInterval).withMisfireHandlingInstructionDoNothing()).build());
+                triggers.add(newTrigger().withIdentity(triggerName, triggerGroupName).startAt(restEvent.getStartDate()).endAt(restEvent.getRoopEndDate()).withSchedule(calendarIntervalSchedule().withIntervalInYears(roopInterval).withMisfireHandlingInstructionDoNothing()).withPriority(priority).build());
                 logger.info("{}.{} TRIGGER_NAME:{}, TRIGGER_GROUP_NAME:{}, ROOP_TYPE:{}" , MessageConst.SUCCESS_CREATE_TRIGGER.getId(), MessageConst.SUCCESS_CREATE_TRIGGER.getMessage(), triggerName, triggerGroupName, "年ループ");
             }
                 

@@ -6,6 +6,7 @@
 package com.hassoubeat.toytalk.rest;
 
 import com.hassoubeat.toytalk.constract.MessageConst;
+import com.hassoubeat.toytalk.constract.PropertyConst;
 import com.hassoubeat.toytalk.entity.RestEvent;
 import com.hassoubeat.toytalk.gpio.GpioManager;
 import com.hassoubeat.toytalk.gpio.ToyTalkEvent;
@@ -17,7 +18,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.ResourceBundle;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotAuthorizedException;
@@ -50,14 +50,10 @@ public class RestClient {
     final private String HEADER_NAME_MAC_ADDRESS = "macAddress";
     final private String HEADER_NAME_TOY_TALK_VERSION = "toyTalkVersion";
     
-    final private String REST_RESOUCE_PATH;
+    final private String REST_RESOUCE_PATH = PropertyConst.REST_RESOURCES_PATH;
     final private String FETCH_ALL_EVENT_RESOUCE_PATH = "events/0.1/events";
-//    final private String FETCH_EVENT_COMPLETE_NOTICE_RESOUCE_PATH = "events/0.1/events/notice";
 
     private RestClient() {
-        // プロパティファイルからREST_APIのリソースパスの取得
-        ResourceBundle properties = ResourceBundle.getBundle("PathConfig");
-        this.REST_RESOUCE_PATH = properties.getString("rest.resource.path");
     }
     
     /**
